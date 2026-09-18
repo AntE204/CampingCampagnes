@@ -1,6 +1,12 @@
 package navigation;
 import models.TitleDesc;
 import utils.TextDeco;
+import org.jline.terminal.Attributes;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.utils.NonBlockingReader;
+import org.jline.utils.InfoCmp.Capability;
+import java.io.IOException;
 
 public class Menu extends TitleDesc {
     private Choice[] choices;
@@ -28,8 +34,61 @@ public class Menu extends TitleDesc {
      * La sélection du choix se fait avec la touche Entrer
      * @return L'indice du choix sélectionné
      */
-    public int run() {
-        // TODO
+    public int run() throws IOException {
+        try (Terminal terminal = TerminalBuilder.builder().system(true).build()) {
+            Attributes saved = terminal.enterRawMode();   // pas d'attente de Entrée, pas d'écho
+            NonBlockingReader reader = terminal.reader();
+
+            this.print();
+            boolean running = true;
+
+            while (running) {
+                // Sleep 16 ms
+                int input = reader.read(1000 / 60);
+
+                // Aucune touche
+                if (input == NonBlockingReader.READ_EXPIRED)
+                    continue;
+
+                // TODO commenter
+                if (input == NonBlockingReader.EOF)
+                    break;
+
+                // CTRL + C : exit le programme
+                IO.println(input);
+                if (input == 3) {
+                    terminal.setAttributes(saved);
+                    System.exit(0);
+                }
+
+                // Touche Entrer
+                if (input == '\r' || input == '\n')
+                    running = false;
+
+                // Touche flèche
+                // TODO commenter la suite
+                else if (input == 27) {
+                    int c1 = reader.read(50);
+                    if (c1 == '[' || c1 == 'O') {
+                        int c2 = reader.read(50);
+
+                        // Flèche haut
+                        if (c2 == 'A') {
+                            this.select_previous_choice();
+                            this.print();
+                        }
+                        // Flèche bas
+                        else if (c2 == 'B') {
+                            this.select_next_choice();
+                            this.print();
+                        }
+                    }
+                }
+            }
+
+            // Restaure le terminal
+            terminal.setAttributes(saved);
+        }
         return this.choice_index;
     }
 
@@ -37,6 +96,10 @@ public class Menu extends TitleDesc {
      * Affiche le menu et ses différents choix
      */
     public void print() {
+        // Clear la console
+        IO.println("\u001B[H\u001B[2J");
+        System.out.flush();
+
         // Title et desc du menu
         IO.println(TextDeco.BLUE + this.get_title());
         IO.println(TextDeco.AQUA + this.get_desc());
