@@ -8,7 +8,7 @@ import org.jline.utils.NonBlockingReader;
 import java.io.IOException;
 
 public class Menu extends TitleDesc {
-    private Choice[] choices;
+    private final Choice[] choices;
     private int choice_index;
 
     public Menu(String title, String desc, Choice[] choices, int choice_index) {
