@@ -1,5 +1,4 @@
 package utils;
-
 import java.text.DecimalFormatSymbols;
 import java.util.Scanner;
 
