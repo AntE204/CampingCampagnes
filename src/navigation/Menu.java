@@ -50,12 +50,11 @@ public class Menu extends TitleDesc {
                 if (input == NonBlockingReader.READ_EXPIRED)
                     continue;
 
-                // TODO commenter
+                // Input fermé
                 if (input == NonBlockingReader.EOF)
                     break;
 
                 // CTRL + C : exit le programme
-                IO.println(input);
                 if (input == 3) {
                     terminal.setAttributes(saved);
                     System.exit(0);
@@ -65,10 +64,11 @@ public class Menu extends TitleDesc {
                 if (input == '\r' || input == '\n')
                     running = false;
 
-                // Touche flèche
-                // TODO commenter la suite
+                // Touche flèche / Echap
                 else if (input == 27) {
                     int c1 = reader.read(50);
+
+                    // Si touche flèche (multiplateforme)
                     if (c1 == '[' || c1 == 'O') {
                         int c2 = reader.read(50);
 
