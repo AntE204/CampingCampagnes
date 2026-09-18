@@ -4,6 +4,7 @@ public class TextDeco {
     public static final String
     RESET = "\u001B[0m",
     BLACK = "\u001B[38;2;0;0;0m",
+    WHITE = "\u001B[38;2;255;255;255m",
 
     RED = "\u001B[38;2;255;63;63m",
     GREEN = "\u001B[38;2;63;255;63m",

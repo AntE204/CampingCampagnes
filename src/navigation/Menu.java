@@ -5,7 +5,6 @@ import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
-import org.jline.utils.InfoCmp.Capability;
 import java.io.IOException;
 
 public class Menu extends TitleDesc {
@@ -22,7 +21,7 @@ public class Menu extends TitleDesc {
             "L'indice du choix (" + choice_index + ") doit être à -1 ou un indice valide d'un choix (de 0 à " + (this.choices.length - 1) + ")");
 
         // Si l'indice pointe un choix désactivé, -1
-        if (!this.choices[choice_index].get_state())
+        if (choice_index != -1 && !this.choices[choice_index].get_state())
             this.choice_index = -1;
         else
             this.choice_index = choice_index;
@@ -117,13 +116,13 @@ public class Menu extends TitleDesc {
             else if (is_locked)
                 IO.println(TextDeco.GREY + "   " + choice.get_title() + " " + TextDeco.RESET);
             else
-                IO.println(TextDeco.RESET + "   " + choice.get_title() + " " + TextDeco.RESET);
+                IO.println(TextDeco.WHITE + "   " + choice.get_title() + " " + TextDeco.RESET);
         }
 
         // Desc du choix sélectionné
         Choice selected_choice = this.get_selected_choice();
         if (selected_choice != null && selected_choice.get_desc() != null)
-            IO.println("\n" + TextDeco.AQUA + selected_choice.get_desc() + TextDeco.RESET);
+            IO.println("\n" + TextDeco.AQUA + selected_choice.get_desc() + TextDeco.WHITE);
     }
 
     /**
@@ -144,9 +143,11 @@ public class Menu extends TitleDesc {
         // Mémorisation de l'ancien index
         int remember = this.choice_index;
 
-        // Si placé sur le dernier choix ou aucun, wrap au premier
-        if (this.choice_index == this.choices.length - 1 || this.choice_index == -1)
+        // Si aucun choix sélectionné, sélectionne le premier
+        if (this.choice_index == -1) {
             this.choice_index = 0;
+            return;
+        }
 
         // Séléctonne le prochain choix disponible
         int tries = 0;
@@ -157,11 +158,9 @@ public class Menu extends TitleDesc {
                 break;
             }
 
-            // Si dernier choix dépassé, retour au premier
+            // Modification de l'indice
             this.choice_index++;
-            if (this.choice_index >= this.choices.length)
-                this.choice_index = 0;
-
+            this.choice_index %= this.choices.length;
             tries++;
         }
         while (!this.choices[this.choice_index].get_state());
@@ -174,9 +173,11 @@ public class Menu extends TitleDesc {
         // Mémorisation de l'ancien index
         int remember = this.choice_index;
 
-        // Si placé sur le premier choix ou aucun, wrap au dernier
-        if (this.choice_index == 0 || this.choice_index == -1)
+        // Si aucun choix sélectionné, sélectionne le dernier
+        if (this.choice_index == -1) {
             this.choice_index = this.choices.length - 1;
+            return;
+        }
 
         // Séléctonne le prochain choix disponible
         int tries = 0;
@@ -187,10 +188,10 @@ public class Menu extends TitleDesc {
                 break;
             }
 
-            // Si en-dessous du premier choix, retour au dernier
+            // Modification de l'indice
             this.choice_index--;
             if (this.choice_index < 0)
-                this.choice_index = this.choices.length - 1;
+                this.choice_index += this.choices.length; // % ne marche pas sur nombres négatifs
 
             tries++;
         }
