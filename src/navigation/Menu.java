@@ -31,9 +31,9 @@ public class Menu extends TitleDesc {
      * Passe en mode sélection du choix du menu
      * La navigation s'effectue avec les flèches du clavier
      * La sélection du choix se fait avec la touche Entrer
-     * @return L'indice du choix sélectionné
+     * @return Le title du choix sélectionné, null si aucun n'est sélectionné
      */
-    public int run() throws IOException {
+    public String run() throws IOException {
         try (Terminal terminal = TerminalBuilder.builder().system(true).build()) {
             Attributes saved = terminal.enterRawMode();   // pas d'attente de Entrée, pas d'écho
             NonBlockingReader reader = terminal.reader();
@@ -88,7 +88,12 @@ public class Menu extends TitleDesc {
             // Restaure le terminal
             terminal.setAttributes(saved);
         }
-        return this.choice_index;
+
+        Choice choice = this.get_selected_choice();
+        if (choice != null)
+            return choice.get_title();
+
+        return null;
     }
 
     /**
