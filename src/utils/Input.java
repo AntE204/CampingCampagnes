@@ -5,11 +5,27 @@ import java.util.Scanner;
 public class Input {
     private static final Scanner scanner = new Scanner(System.in);
 
+    /**
+     * Demande une entrée texte
+     * @param message Le message à afficher dans la console
+     * @return Le nombre rentré par l'utilisateur
+     */
     public static String get_string(String message) {
         IO.print(message);
         return Input.scanner.nextLine();
     }
 
+    public static String get_password(String message) {
+        IO.print(message);
+         return new String(System.console().readPassword());
+    }
+
+    /**
+     * Demande une entrée d'un nombre entier
+     * La fonction boucle tant que l'entrée n'est pas un nombre entier
+     * @param message Le message à afficher dans la console
+     * @return Le nombre entier rentré par l'utilisateur
+     */
     public static int get_int(String message) {
         while (true) {
             IO.print(message);
@@ -22,6 +38,12 @@ public class Input {
         }
     }
 
+    /**
+     * Demande une entrée d'un nombre flottant
+     * La fonction boucle tant que l'entrée n'est pas un nombre flottant
+     * @param message Le message à afficher dans la console
+     * @return Le nombre flottant rentré par l'utilisateur
+     */
     public static double get_double(String message) {
         while (true) {
             IO.print(message);
@@ -38,6 +60,14 @@ public class Input {
         }
     }
 
+    /**
+     * Demande une entrée à deux choix possibles (généralement oui ou non)
+     * La fonction boucle tant que l'entrée n'est pas un des deux caractères possibles
+     * @param message Le message à afficher dans la console
+     * @param yes Le caractère à rentrer considéré comme le choix positif
+     * @param no Le caractère à rentrer considéré comme le choix négatif
+     * @return Un booléen représentant le choix de l'utilisateur
+     */
     public static boolean get_bool(String message, char yes, char no) {
         while (true) {
             IO.print(message);
