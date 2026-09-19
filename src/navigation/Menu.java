@@ -145,20 +145,21 @@ public class Menu extends TitleDesc {
             boolean is_locked = !choice.get_state();
 
             // Title du choix, surligné si sélectionné, gris si bloqué
-            if (is_selected)
-                IO.println(TextDeco.HIGHLIGHT_BLUE + TextDeco.BLACK + " > " + choice.get_title() + " " + TextDeco.RESET);
+            if (is_selected) {
+                IO.print(TextDeco.HIGHLIGHT_BLUE + TextDeco.BLACK + " > " + choice.get_title() + " " + TextDeco.RESET);
+
+                if (choice.get_desc() != null)
+                    IO.print(" " + choice.get_desc());
+
+                IO.print("\n");
+            }
             else if (is_locked)
                 IO.println(TextDeco.GREY + "   " + choice.get_title() + " " + TextDeco.RESET);
             else
                 IO.println(TextDeco.WHITE + "   " + choice.get_title() + " " + TextDeco.RESET);
         }
 
-        // Desc du choix sélectionné
-        Choice selected_choice = this.get_selected_choice();
-        if (selected_choice != null && selected_choice.get_desc() != null)
-            IO.println("\n" + TextDeco.AQUA + selected_choice.get_desc() + TextDeco.RESET + "\n");
-        else
-            IO.print("\n");
+        IO.print("\n");
     }
 
     /**
