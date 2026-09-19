@@ -156,7 +156,9 @@ public class Menu extends TitleDesc {
         // Desc du choix sélectionné
         Choice selected_choice = this.get_selected_choice();
         if (selected_choice != null && selected_choice.get_desc() != null)
-            IO.println("\n" + TextDeco.AQUA + selected_choice.get_desc() + TextDeco.WHITE);
+            IO.println("\n" + TextDeco.AQUA + selected_choice.get_desc() + TextDeco.RESET + "\n");
+        else
+            IO.print("\n");
     }
 
     /**

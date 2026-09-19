@@ -36,7 +36,7 @@ public class Input {
         }
     }
 
-    public static boolean ask_bool(String message, char yes, char no) {
+    public static boolean get_bool(String message, char yes, char no) {
         IO.print(message);
 
         try {
@@ -49,10 +49,10 @@ public class Input {
                 return false;
 
             else
-                return Input.ask_bool(message, yes, no);
+                return Input.get_bool(message, yes, no);
         }
         catch (Exception ex) {
-            return Input.ask_bool(message, yes, no);
+            return Input.get_bool(message, yes, no);
         }
     }
 }
