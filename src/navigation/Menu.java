@@ -6,8 +6,10 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.jline.utils.NonBlockingReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 public class Menu extends TitleDesc {
+    private static Terminal terminal = null;
     private final Choice[] choices;
     private int choice_index;
 
@@ -28,16 +30,36 @@ public class Menu extends TitleDesc {
     }
 
     /**
+     * Initialise le terminal de l'application
+     * @return `true` si le terminal a correctement été initialisé, sinon `false`
+     */
+    public static boolean init_terminal() {
+        try {
+            Menu.terminal = TerminalBuilder.builder().system(true).build();
+            return true;
+        }
+        catch (Exception ex) {
+            IO.println("Le terminal n'a pas pu être initialisé : " + ex.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Passe en mode sélection du choix du menu
      * La navigation s'effectue avec les flèches du clavier
      * La sélection du choix se fait avec la touche Entrer
      * @return Le title du choix sélectionné, null si aucun n'est sélectionné
      */
-    public String run() throws IOException {
-        try (Terminal terminal = TerminalBuilder.builder().system(true).build()) {
-            Attributes saved = terminal.enterRawMode();   // pas d'attente de Entrée, pas d'écho
-            NonBlockingReader reader = terminal.reader();
+    public String run() {
+        if (Menu.terminal == null) {
+            IO.println("Le terminal doit être initialisé en appelant Menu.init_terminal().");
+            System.exit(1);
+        }
 
+        Attributes saved = Menu.terminal.enterRawMode();
+        NonBlockingReader reader = Menu.terminal.reader();
+
+        try {
             this.print();
             boolean running = true;
 
@@ -55,7 +77,7 @@ public class Menu extends TitleDesc {
 
                 // CTRL + C : exit le programme
                 if (input == 3) {
-                    terminal.setAttributes(saved);
+                    Menu.terminal.setAttributes(saved);
                     System.exit(0);
                 }
 
@@ -84,9 +106,14 @@ public class Menu extends TitleDesc {
                     }
                 }
             }
-
+        }
+        catch (IOException ex) {
+            // Ignore l'exception
+            throw new UncheckedIOException(ex);
+        }
+        finally {
             // Restaure le terminal
-            terminal.setAttributes(saved);
+            Menu.terminal.setAttributes(saved);
         }
 
         Choice choice = this.get_selected_choice();
