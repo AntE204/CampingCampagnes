@@ -3,7 +3,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Scanner;
 
 public class Input {
-    private static Scanner scanner = new Scanner(System.in);
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static String get_string(String message) {
         IO.print(message);
@@ -36,7 +36,7 @@ public class Input {
         }
     }
 
-    public  static boolean ask_bool(String message, char yes, char no) {
+    public static boolean ask_bool(String message, char yes, char no) {
         IO.print(message);
 
         try {
