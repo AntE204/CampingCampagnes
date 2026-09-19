@@ -133,7 +133,9 @@ public class Menu extends TitleDesc {
 
         // Title et desc du menu
         IO.println(TextDeco.BLUE + this.get_title());
-        IO.println(TextDeco.AQUA + this.get_desc());
+        if (this.get_desc() != null)
+            IO.println(TextDeco.AQUA + this.get_desc());
+
         IO.print("\n");
 
         for (int i = 0; i < this.choices.length; i++) {
