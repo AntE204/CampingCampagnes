@@ -24,7 +24,7 @@ public class Navigation {
     public static boolean ask_login() {
         boolean ask = true;
         while (ask) {
-            String id = Input.get_string("Identifiant : ");
+            String id = Input.get_string("Email : ");
             String password = Input.get_password("Mot de passe : ");
 
             // TODO connexion à la DB

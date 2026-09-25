@@ -1,1 +1,2 @@
-java -cp "out/production/CampingCampagnes;lib/jline-4.4.5.jar" Main
+#!/bin/bash
+mvn compile exec:java -Dexec.mainClass="Main" -q
