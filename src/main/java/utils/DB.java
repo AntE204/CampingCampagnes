@@ -44,4 +44,9 @@ public class DB {
         }
     }
 
+    public static boolean passwordStrong(String pwd) {
+        return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
+    }
+
+
 }
