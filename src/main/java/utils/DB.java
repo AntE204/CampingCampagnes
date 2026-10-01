@@ -30,9 +30,13 @@ public class DB {
             return false;
         }
 
-        String URL = (String) jo.get("URL");
+        String HOST = (String) jo.get("HOST");
+        String PORT = (String) jo.get("PORT");
+        String DB_NAME = (String) jo.get("DB_NAME");
         String LOGIN = (String) jo.get("USER");
         String PASSWORD = (String) jo.get("PASSWORD");
+
+        String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME;
 
         try {
             DB.pdo = DriverManager.getConnection(URL, LOGIN, PASSWORD);

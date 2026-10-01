@@ -1,8 +1,13 @@
 import navigation.Menu;
 import navigation.Navigation;
+import utils.DB;
 
 public class Main {
     public static void main(String[] args) {
+        // Connexion à la DB
+        if (!DB.init())
+            System.exit(1);
+
         // Init le terminal
         if (!Menu.init_terminal())
             System.exit(1);
