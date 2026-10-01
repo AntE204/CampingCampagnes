@@ -117,5 +117,31 @@ public class DB {
             return false;
         }
     }
+    public static boolean checkAnimLimit(int idAnimateur, String date) {
+        String checkLimit = "SELECT Count(*) as number FROM anime WHERE idAnimateur=? AND date=?";
+        try {
+            PreparedStatement stmt = pdo.prepareStatement(checkLimit);
+            stmt.setInt(1, idAnimateur);
+            stmt.setString(2, date);
+            ResultSet res = stmt.executeQuery();
+            if (res.next()) {
+                int nbAnim = res.getInt("number");
+                if (nbAnim >= 7) {
+//                    System.out.println("L'animateur a atteint ou dépassé la limite d'activités par jour ! ");
+                    return false;
+                } else {
+                    return true;
+                }
+            } else {
+                System.out.println("L'animateur n'a pas été trouvé!");
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.out.println("ERREUR");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 
 }
