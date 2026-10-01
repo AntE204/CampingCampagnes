@@ -13,6 +13,10 @@ import java.sql.*;
 public class DB {
     private static Connection pdo = null;
 
+    /**
+     * Fonction pour initialiser la base de données
+     * @return Si la base a bien été initialisée
+     */
     public static boolean init() {
         JSONObject jo = null;
 
@@ -47,10 +51,27 @@ public class DB {
         }
     }
 
+    /**
+     * Fonction qui va vérifier la force du mot de passe (12 caractères, minimum 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)
+     * @param pwd Le mot de passe de l'utilisateur
+     * @return Si le mot de passe est assez fort
+     */
     public static boolean passwordStrong(String pwd) {
         return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
     }
 
+    /**
+     * Ajoute un utilisateur dans la base de données
+     * @param mail L'email de l'utilisateur
+     * @param tel Le téléphone de l'utilisateur
+     * @param nom Le nom de l'utilisateur
+     * @param prenom Le prénom de l'utilisateur
+     * @param rue La rue de l'utilisateur
+     * @param ville La ville de l'utilisateur
+     * @param codePostal Le code postal de l'utilisateur
+     * @param mdpClair Le mot de passe en clair de l'utilisateur
+     * @return Si l'utilisateur a bien été enregistré
+     */
     public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair) {
         String insert = "INSERT INTO animateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse) VALUES (?,?,?,?,?,?,?,?)";
         String check = "SELECT id FROM animateur WHERE mail LIKE ?";
@@ -92,6 +113,12 @@ public class DB {
 
     }
 
+    /**
+     * Fonction pour se connecter à l'application
+     * @param mail Le mail de l'utilisateur
+     * @param mdpClair Le mot de passe en clair de l'utilisateur
+     * @return Si l'utilisateur a bien pu se connecter
+     */
     public static boolean connexion(String mail, String mdpClair) {
         String checkpwd = "SELECT motDePasse FROM animateur WHERE mail=?";
 //        String connexion = "SELECT id FROM animateur WHERE mail=? AND motDePasse=?";
@@ -121,6 +148,13 @@ public class DB {
             return false;
         }
     }
+
+    /**
+     * Fonction pour checker qu'un animateur n'a pas dépassé la limite d'animations par jour
+     * @param idAnimateur L'id de l'animateur duquel on va vérifier le nombre d'animations
+     * @param date La date de l'animation
+     * @return Si l'animateur n'a pas dépassé la limite et peut donc animer l'activité
+     */
     public static boolean checkAnimLimit(int idAnimateur, String date) {
         String checkLimit = "SELECT Count(*) as number FROM anime WHERE idAnimateur=? AND date=?";
         try {
@@ -148,6 +182,12 @@ public class DB {
         }
     }
 
+    /**
+     * Fonction pour créer une animation
+     * @param libelle Le nom de l'activite que l'on veut créer
+     * @param dureeEnMinutes La durée de l'activité en minutes
+     * @return Si l'animation a bien été crée
+     */
     public static boolean createAnimation(String libelle, int dureeEnMinutes){
         String newAnime= "INSERT INTO animation (libelle, duree) VALUES (?, ?)";
         try {
@@ -162,5 +202,7 @@ public class DB {
             return false;
         }
     }
+
+
 
 }
