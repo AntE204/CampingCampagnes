@@ -3,13 +3,12 @@ package utils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class DB {
     private static Connection pdo = null;
@@ -46,6 +45,47 @@ public class DB {
 
     public static boolean passwordStrong(String pwd) {
         return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
+    }
+
+    public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair) {
+        String insert = "INSERT INTO animateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse) VALUES (?,?,?,?,?,?,?,?)";
+        String check = "SELECT id FROM animateur WHERE mail LIKE ?";
+        try {
+            PreparedStatement checkdouble = pdo.prepareStatement(check);
+            checkdouble.setString(1, mail);
+            ResultSet res = checkdouble.executeQuery();
+            if (res.next()) {
+                System.out.println("Un utilisateur avec cette adresse mail existe déja dans la base!");
+                return false;
+            } else {
+                if (passwordStrong(mdpClair)) {
+                    String mspHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
+                    System.out.println("L'utilisateur a bien été crée");
+                    PreparedStatement prep = pdo.prepareStatement(insert);
+                    prep.setString(1, mail);
+                    prep.setString(2, tel);
+                    prep.setString(3, nom);
+                    prep.setString(4, prenom);
+                    prep.setString(5, rue);
+                    prep.setString(6, ville);
+                    prep.setString(7, codePostal);
+                    prep.setString(8, mspHash);
+                    prep.executeUpdate();
+                    return true;
+                } else {
+                    System.out.println("Le mot de passe n'est pas assez fort! (12 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)");
+                    return false;
+                }
+
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println("ERREUR");
+            System.out.println(e.getMessage());
+            return false;
+        }
+
     }
 
 
