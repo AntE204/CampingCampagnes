@@ -88,5 +88,34 @@ public class DB {
 
     }
 
+    public static boolean connexion(String mail, String mdpClair) {
+        String checkpwd = "SELECT motDePasse FROM animateur WHERE mail=?";
+//        String connexion = "SELECT id FROM animateur WHERE mail=? AND motDePasse=?";
+        try {
+            PreparedStatement check = pdo.prepareStatement(checkpwd);
+            check.setString(1, mail);
+            ResultSet pwd = check.executeQuery();
+            if (pwd.next()) {
+                String pwdHash = pwd.getString("motDePasse");
+                boolean authenticate = BCrypt.checkpw(mdpClair, pwdHash);
+                if (authenticate) {
+                    System.out.println("Vous êtes connecté");
+                    return true;
+                } else {
+                    System.out.println("mot de passe et/ou email incorrect !");
+                    return false;
+                }
+            } else {
+                System.out.println("mot de passe et/ou email incorrect !");
+                return false;
+            }
+
+
+        } catch (SQLException e) {
+            System.out.println("ERREUR");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 
 }
