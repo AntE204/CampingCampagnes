@@ -1,0 +1,6 @@
+{
+    "HOST": "localhost",
+    "DB_NAME": "nom_bdd",
+    "USER": "root",
+    "PASSWORD": ""
+}
