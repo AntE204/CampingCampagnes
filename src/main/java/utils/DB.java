@@ -83,22 +83,27 @@ public class DB {
                 System.out.println("Un utilisateur avec cette adresse mail existe déja dans la base!");
                 return false;
             } else {
-                if (passwordStrong(mdpClair)) {
-                    String mspHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
-                    System.out.println("L'utilisateur a bien été crée");
-                    PreparedStatement prep = pdo.prepareStatement(insert);
-                    prep.setString(1, mail);
-                    prep.setString(2, tel);
-                    prep.setString(3, nom);
-                    prep.setString(4, prenom);
-                    prep.setString(5, rue);
-                    prep.setString(6, ville);
-                    prep.setString(7, codePostal);
-                    prep.setString(8, mspHash);
-                    prep.executeUpdate();
-                    return true;
-                } else {
-                    System.out.println("Le mot de passe n'est pas assez fort! (12 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)");
+                if(verifMail(mail)){
+                    if (passwordStrong(mdpClair)) {
+                        String mspHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
+                        System.out.println("L'utilisateur a bien été crée");
+                        PreparedStatement prep = pdo.prepareStatement(insert);
+                        prep.setString(1, mail);
+                        prep.setString(2, tel);
+                        prep.setString(3, nom);
+                        prep.setString(4, prenom);
+                        prep.setString(5, rue);
+                        prep.setString(6, ville);
+                        prep.setString(7, codePostal);
+                        prep.setString(8, mspHash);
+                        prep.executeUpdate();
+                        return true;
+                    }else {
+                        System.out.println("Le mot de passe n'est pas assez fort! (12 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)");
+                        return false;
+                    }
+                }else{
+                    System.out.println("L'email n'est pas valide!");
                     return false;
                 }
 
@@ -203,6 +208,14 @@ public class DB {
         }
     }
 
+    /**
+     * Vérifie si une adresse mail est valide (***@***.***)
+     * @param mail Le mail de l'utilisateur
+     * @return Si l'email est valide (une @, un point après l'@)
+     */
+    public static boolean verifMail(String mail){
+        return mail.matches("^((?!\\.)[\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$");
+    }
 
 
 }
