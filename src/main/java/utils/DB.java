@@ -144,4 +144,19 @@ public class DB {
         }
     }
 
+    public static boolean createAnimation(String libelle, int dureeEnMinutes){
+        String newAnime= "INSERT INTO animation (libelle, duree) VALUES (?, ?)";
+        try {
+            PreparedStatement Animation = pdo.prepareStatement(newAnime);
+            Animation.setString(1, libelle);
+            Animation.setInt(2, dureeEnMinutes);
+            Animation.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println("ERREUR");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
 }
