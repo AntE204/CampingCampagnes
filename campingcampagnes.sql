@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:3306
--- Généré le : ven. 02 oct. 2026 à 11:50
+-- Généré le : ven. 02 oct. 2026 à 12:18
 -- Version du serveur : 10.11.14-MariaDB-0+deb12u2
 -- Version de PHP : 8.2.29
 
@@ -61,7 +61,8 @@ CREATE TABLE `utilisateur` (
   `rue` varchar(200) NOT NULL,
   `ville` varchar(200) NOT NULL,
   `codePostal` varchar(5) NOT NULL,
-  `motDePasse` varchar(255) NOT NULL
+  `motDePasse` varchar(255) NOT NULL,
+  `permission` enum('animateur','directeur') NOT NULL DEFAULT 'animateur'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -100,7 +101,7 @@ ALTER TABLE `animation`
 -- AUTO_INCREMENT pour la table `utilisateur`
 --
 ALTER TABLE `utilisateur`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

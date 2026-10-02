@@ -1,4 +1,5 @@
 package navigation;
+import utils.DB;
 import utils.Input;
 import utils.TextDeco;
 
@@ -24,11 +25,10 @@ public class Navigation {
     public static boolean ask_login() {
         boolean ask = true;
         while (ask) {
-            String id = Input.get_string("Email : ");
+            String email = Input.get_string("Email : ");
             String password = Input.get_password("Mot de passe : ");
 
-            // TODO connexion à la DB
-            boolean login_res = false; // Simulation temporaire
+            boolean login_res = DB.connexion(email, password);
 
             if (login_res)
                 return true;

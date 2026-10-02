@@ -6,18 +6,23 @@ public class Main {
     public static void main(String[] args) {
         // Connexion à la DB
         if (!DB.init())
-            System.exit(1);
+            exit(1);
 
         // Init le terminal
         if (!Menu.init_terminal())
-            System.exit(1);
+            exit(1);
 
         // Menu : Se connecter / Quitter
         if (Navigation.menu_login().equals("Quitter"))
-            return;
+            exit(0);
 
-        // Demande nom et mdp, quitte si ne parvient pas à se conencter au compte
-        if (Navigation.ask_login())
-            return;
+        // Demande nom et mdp, quitte si ne parvient pas à se connecter au compte
+        if (!Navigation.ask_login())
+            exit(0);
+    }
+
+    private static void exit(int code) {
+        DB.close();
+        System.exit(code);
     }
 }

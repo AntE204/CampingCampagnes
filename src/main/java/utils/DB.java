@@ -52,6 +52,19 @@ public class DB {
     }
 
     /**
+     * Ferme la connexion à la base de données
+     */
+    public static void close() {
+        try {
+            if (DB.pdo != null)
+                DB.pdo.close();
+        }
+        catch (Exception e) {
+
+        }
+    }
+
+    /**
      * Fonction qui va vérifier la force du mot de passe (12 caractères, minimum 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)
      * @param pwd Le mot de passe de l'utilisateur
      * @return Si le mot de passe est assez fort
@@ -116,6 +129,24 @@ public class DB {
             return false;
         }
 
+    }
+
+    /**
+     * Vérifie si au moins un utilisateur directeur existe dans la base de données
+     * @return Si un utilisateur directeur existe dans la base de données
+     */
+    public static boolean noDirectorAccount() {
+        String sql = "SELECT id FROM utilisateur WHERE permission = ?";
+        try {
+            PreparedStatement check = pdo.prepareStatement(sql);
+            check.setString(1, "directeur");
+            ResultSet res = check.executeQuery();
+            return !res.next();
+        }
+        catch (SQLException e) {
+            System.out.println("ERREUR : " + e.getMessage());
+            return false;
+        }
     }
 
     /**
