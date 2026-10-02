@@ -73,8 +73,8 @@ public class DB {
      * @return Si l'utilisateur a bien été enregistré
      */
     public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair) {
-        String insert = "INSERT INTO animateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse) VALUES (?,?,?,?,?,?,?,?)";
-        String check = "SELECT id FROM animateur WHERE mail LIKE ?";
+        String insert = "INSERT INTO utilisateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse) VALUES (?,?,?,?,?,?,?,?)";
+        String check = "SELECT id FROM utilisateur WHERE mail LIKE ?";
         try {
             PreparedStatement checkdouble = pdo.prepareStatement(check);
             checkdouble.setString(1, mail);
@@ -125,7 +125,7 @@ public class DB {
      * @return Si l'utilisateur a bien pu se connecter
      */
     public static boolean connexion(String mail, String mdpClair) {
-        String checkpwd = "SELECT motDePasse FROM animateur WHERE mail=?";
+        String checkpwd = "SELECT motDePasse FROM utilisateur WHERE mail=?";
 //        String connexion = "SELECT id FROM animateur WHERE mail=? AND motDePasse=?";
         try {
             PreparedStatement check = pdo.prepareStatement(checkpwd);
@@ -216,6 +216,8 @@ public class DB {
     public static boolean verifMail(String mail){
         return mail.matches("^((?!\\.)[\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$");
     }
+
+   
 
 
 }
