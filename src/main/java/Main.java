@@ -16,9 +16,16 @@ public class Main {
         if (Navigation.menu_login().equals("Quitter"))
             exit(0);
 
+        // Demande à créer un compte directeur si aucun n'existent
+        if (DB.noDirectorAccount())
+            if (!Navigation.register_account(true))
+                exit(1);
+
         // Demande nom et mdp, quitte si ne parvient pas à se connecter au compte
         if (!Navigation.ask_login())
             exit(0);
+
+        exit(0);
     }
 
     private static void exit(int code) {

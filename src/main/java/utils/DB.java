@@ -70,7 +70,7 @@ public class DB {
      * @return Si le mot de passe est assez fort
      */
     public static boolean passwordStrong(String pwd) {
-        return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{12,}$");
+        return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.])(?=\\S+$).{12,}$");
     }
 
     /**
@@ -85,8 +85,8 @@ public class DB {
      * @param mdpClair Le mot de passe en clair de l'utilisateur
      * @return Si l'utilisateur a bien été enregistré
      */
-    public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair) {
-        String insert = "INSERT INTO utilisateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse) VALUES (?,?,?,?,?,?,?,?)";
+    public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair, boolean isDirector) {
+        String insert = "INSERT INTO utilisateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse, permission) VALUES (?,?,?,?,?,?,?,?,?)";
         String check = "SELECT id FROM utilisateur WHERE mail LIKE ?";
         try {
             PreparedStatement checkdouble = pdo.prepareStatement(check);
@@ -98,7 +98,7 @@ public class DB {
             } else {
                 if(verifMail(mail)){
                     if (passwordStrong(mdpClair)) {
-                        String mspHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
+                        String mdpHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
                         System.out.println("L'utilisateur a bien été crée");
                         PreparedStatement prep = pdo.prepareStatement(insert);
                         prep.setString(1, mail);
@@ -108,7 +108,8 @@ public class DB {
                         prep.setString(5, rue);
                         prep.setString(6, ville);
                         prep.setString(7, codePostal);
-                        prep.setString(8, mspHash);
+                        prep.setString(8, mdpHash);
+                        prep.setString(9, isDirector ? "directeur" : "animateur");
                         prep.executeUpdate();
                         return true;
                     }else {
