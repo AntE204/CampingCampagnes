@@ -50,6 +50,12 @@
             <version>9.3.5</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+
     </dependencies>
 
     <build>
