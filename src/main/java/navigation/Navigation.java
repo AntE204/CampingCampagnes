@@ -1,9 +1,11 @@
 package navigation;
+import dbres.DBDeleteAccount;
 import dbres.DBRes;
 import utils.DB;
 import utils.Input;
 import utils.TextDeco;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class Navigation {
     }
 
     /**
-     * Demande les informations d'un nouveau compte et l'ajoute en base de données
+     * Permet de créer ou modifier un compte en demandant les informations
      * @param force_director Si le compte créé est le 1er compte de la base (forcément directeur)
      * @param old_email En cas de modification de compte, l'ancien email de l'utilisateur
      */
@@ -137,24 +139,57 @@ public class Navigation {
         return menu.run();
     }
 
+    /**
+     * Demande les informations d'un compte à modifier
+     */
     public static void edit_an_account() {
         String old_email = Input.get_string("Entrez l'email du compte à modifier : ");
 
-        // Email n'existe pas
+        // Email pas utilisé
         if (!DB.verifMail(old_email)) {
-            Menu.set_popup("Cet email n'existe pas !");
+            Menu.set_popup("Cet email n'est pas utilisé !");
             return;
         }
 
         Navigation.register_account(false, old_email);
     }
 
-    public static void delete_account() {
-        // TODO
+    /**
+     * Supprime un compte
+     * @return Si l'utilisateur supprimé correspond à l'utilisateur actuellement connecté
+     */
+    public static boolean delete_account() {
+        String email = Input.get_string("Entrez l'email de l'utilisateur à supprimer : ");
+
+        // Email pas utilisé
+        if (!DB.verifMail(email)) {
+            Menu.set_popup("Cet email n'est pas utilisé !");
+            return false;
+        }
+
+        DBDeleteAccount res = DB.deleteAccount(email);
+        if (!res.ok) {
+            if (res.is_self)
+                IO.println(res.error);
+            else
+                Menu.set_popup(res.error);
+        }
+
+        return res.is_self;
     }
 
     public static void create_animation() {
-        // TODO
+        String name = Input.get_string("Nom de l'animation : ");
+
+        DBRes res_exists = DB.animationExists(name);
+        if (!res_exists.ok) {
+            Menu.set_popup(res_exists.error);
+            return;
+        }
+
+        int length = Input.get_int("Durée de l'animation en minutes : ");
+        DBRes res_create = DB.createAnimation(name, length);
+        Menu.set_popup(res_create.ok ? "L'animation a été créée !" : res_create.error);
     }
 
     public static void set_animators() {

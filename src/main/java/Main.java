@@ -38,8 +38,10 @@ public class Main {
             else if (main_choice.equals("Modifier un compte"))
                 Navigation.edit_an_account();
 
-            else if (main_choice.equals("Supprimer un compte"))
-                Navigation.delete_account();
+            else if (main_choice.equals("Supprimer un compte")) {
+                if (Navigation.delete_account())
+                    System.exit(0);
+            }
 
             else if (main_choice.equals("Créer une animation"))
                 Navigation.create_animation();

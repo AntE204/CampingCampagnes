@@ -30,7 +30,9 @@ public class Input {
         while (true) {
             IO.print(message);
             try {
-                return Input.scanner.nextInt();
+                int res = Input.scanner.nextInt();
+                Input.scanner.nextLine();
+                return res;
             }
             catch (Exception ex) {
                 // L'exception est ignorée

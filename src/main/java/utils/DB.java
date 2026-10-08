@@ -1,5 +1,6 @@
 package utils;
 
+import dbres.DBDeleteAccount;
 import dbres.DBRes;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -169,6 +170,34 @@ public class DB {
     }
 
     /**
+     * Supprime un compte
+     * @param email L'email du compte à supprimer
+     * @return Si l'utilsiateur a correctement été supprimé
+     */
+    public static DBDeleteAccount deleteAccount(String email) {
+        String sql_select = "SELECT id FROM utilisateur WHERE mail LIKE ?";
+        String sql_delete = "DELETE FROM utilisateur WHERE mail LIKE ?";
+
+        try {
+            // Vérifie si l'utilisateur supprimé est l'utilisateur connecté
+            PreparedStatement req_select = pdo.prepareStatement(sql_select);
+            req_select.setString(1, email);
+            ResultSet res = req_select.executeQuery();
+            boolean is_self = res.next() && res.getInt("id") == DB.loggedUser;
+
+            // Supprime l'utilisateur
+            PreparedStatement req_delete = pdo.prepareStatement(sql_delete);
+            req_delete.setString(1, email);
+            boolean deleted = req_delete.executeUpdate() == 1;
+
+            return new DBDeleteAccount(deleted, !deleted ? null : "L'utilisateur n'a pas pu être supprimé.", is_self);
+        }
+        catch (SQLException e) {
+            return new DBDeleteAccount(false, "Erreur lors de la suppression de l'utilisateur : " + e.getMessage(), false);
+        }
+    }
+
+    /**
      * Vérifie si au moins un utilisateur directeur existe dans la base de données
      * @return Si un utilisateur directeur existe dans la base de données
      */
@@ -264,6 +293,24 @@ public class DB {
             return new DBRes(true);
         } catch (SQLException e) {
             return new DBRes(false, "Erreur lors de la création d'une animation : " + e.getMessage());
+        }
+    }
+
+    public static DBRes animationExists(String name) {
+        String sql = "SELECT libelle FROM animation WHERE libelle LIKE ?";
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, name);
+            ResultSet res = req.executeQuery();
+
+            if (res.next())
+                return new DBRes(false, "Il existe déjà une animation avec cet intitulé.");
+            else
+                return new DBRes(true);
+        }
+        catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de la vérification de l'existence d'une animation : " + e.getMessage());
         }
     }
 
