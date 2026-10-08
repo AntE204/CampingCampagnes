@@ -12,6 +12,7 @@ import java.sql.*;
 
 public class DB {
     private static Connection pdo = null;
+    public static Integer loggedUser = null;
 
     /**
      * Fonction pour initialiser la base de données
@@ -157,17 +158,18 @@ public class DB {
      * @return Si l'utilisateur a bien pu se connecter
      */
     public static boolean connexion(String mail, String mdpClair) {
-        String checkpwd = "SELECT motDePasse FROM utilisateur WHERE mail=?";
+        String checkpwd = "SELECT id, motDePasse FROM utilisateur WHERE mail=?";
 //        String connexion = "SELECT id FROM animateur WHERE mail=? AND motDePasse=?";
         try {
             PreparedStatement check = pdo.prepareStatement(checkpwd);
             check.setString(1, mail);
-            ResultSet pwd = check.executeQuery();
-            if (pwd.next()) {
-                String pwdHash = pwd.getString("motDePasse");
+            ResultSet res = check.executeQuery();
+            if (res.next()) {
+                String pwdHash = res.getString("motDePasse");
                 boolean authenticate = BCrypt.checkpw(mdpClair, pwdHash);
                 if (authenticate) {
                     System.out.println("Vous êtes connecté");
+                    DB.loggedUser = res.getInt("id");
                     return true;
                 } else {
                     System.out.println("mot de passe et/ou email incorrect !");
