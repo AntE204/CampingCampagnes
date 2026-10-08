@@ -1,5 +1,6 @@
 package utils;
 
+import dbres.DBRes;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -14,6 +15,7 @@ public class DB {
     private static Connection pdo = null;
     public static Integer loggedUser = null;
     public static boolean isDirecteur = false;
+    public static String firstName = null;
 
     /**
      * Fonction pour initialiser la base de données
@@ -87,7 +89,7 @@ public class DB {
      * @param mdpClair Le mot de passe en clair de l'utilisateur
      * @return Si l'utilisateur a bien été enregistré
      */
-    public static boolean registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair, boolean isDirector) {
+    public static DBRes registerAccount(String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair, boolean isDirector) {
         String insert = "INSERT INTO utilisateur (mail, telephone, nom, prenom, rue, ville, codePostal, motDePasse, permission) VALUES (?,?,?,?,?,?,?,?,?)";
         String check = "SELECT id FROM utilisateur WHERE mail LIKE ?";
         try {
@@ -95,8 +97,7 @@ public class DB {
             checkdouble.setString(1, mail);
             ResultSet res = checkdouble.executeQuery();
             if (res.next()) {
-                System.out.println("Un utilisateur avec cette adresse mail existe déja dans la base!");
-                return false;
+                return new DBRes(false, "Cet email est déjà utilisé !");
             } else {
                 if(verifMail(mail)){
                     if (passwordStrong(mdpClair)) {
@@ -113,25 +114,58 @@ public class DB {
                         prep.setString(8, mdpHash);
                         prep.setString(9, isDirector ? "directeur" : "animateur");
                         prep.executeUpdate();
-                        return true;
+                        return new DBRes(true);
                     }else {
-                        System.out.println("Le mot de passe n'est pas assez fort! (12 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)");
-                        return false;
+                        return new DBRes(false, "Le mot de passe n'est pas assez fort! (12 caractères minimum, 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial)");
                     }
                 }else{
-                    System.out.println("L'email n'est pas valide!");
-                    return false;
+                    return new DBRes(false, "L'email n'est pas valide!");
                 }
-
-
             }
-
         } catch (SQLException e) {
-            System.out.println("ERREUR");
-            System.out.println(e.getMessage());
-            return false;
+            return new DBRes(false, "Erreur lors de la création du compte : " + e.getMessage());
         }
 
+    }
+
+    /**
+     * Modifie les informations d'un compte utilisateur
+     * @param oldEmail L'ancien email de l'utilisateur
+     * @param tel Le téléphone de l'utilisateur
+     * @param nom Le nom de l'utilisateur
+     * @param prenom Le prénom de l'utilisateur
+     * @param rue La rue de l'utilisateur
+     * @param ville La ville de l'utilisateur
+     * @param codePostal Le code postal de l'utilisateur
+     * @param mdpClair Le mot de passe en clair de l'utilisateur
+     * @return Si l'utilisateur a bien été modifié
+     */
+    public static DBRes editAccount(String oldEmail, String mail, String tel, String nom, String prenom, String rue, String ville, String codePostal, String mdpClair, boolean isDirector) {
+        String sql = "UPDATE utilisateur SET mail = ?, telephone = ?, nom = ?, prenom = ?, rue = ?, ville = ?, codePostal = ?, motDePasse = ?, permission = ? WHERE mail LIKE ?";
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, mail);
+            req.setString(2, tel);
+            req.setString(3, nom);
+            req.setString(4, prenom);
+            req.setString(5, rue);
+            req.setString(6, ville);
+            req.setString(7, codePostal);
+            req.setString(8, BCrypt.hashpw(mdpClair, BCrypt.gensalt()));
+            req.setString(9, isDirector ? "directeur" : "animateur");
+            req.setString(10, oldEmail);
+
+            boolean res = req.executeUpdate() == 1;
+
+            if (res)
+                return new DBRes(true);
+            else
+                return new DBRes(false, "L'email ne correspond à aucun utilisateur.");
+        }
+        catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de la modification d'un compte : " + e.getMessage());
+        }
     }
 
     /**
@@ -147,7 +181,7 @@ public class DB {
             return !res.next();
         }
         catch (SQLException e) {
-            System.out.println("ERREUR : " + e.getMessage());
+            IO.println("Erreur lors de la vérification de la présence d'un compte directeur : " + e.getMessage());
             return false;
         }
     }
@@ -158,9 +192,8 @@ public class DB {
      * @param mdpClair Le mot de passe en clair de l'utilisateur
      * @return Si l'utilisateur a bien pu se connecter
      */
-    public static boolean connexion(String mail, String mdpClair) {
-        String checkpwd = "SELECT id, motDePasse, permission FROM utilisateur WHERE mail=?";
-//        String connexion = "SELECT id FROM animateur WHERE mail=? AND motDePasse=?";
+    public static DBRes connexion(String mail, String mdpClair) {
+        String checkpwd = "SELECT id, prenom, motDePasse, permission FROM utilisateur WHERE mail=?";
         try {
             PreparedStatement check = pdo.prepareStatement(checkpwd);
             check.setString(1, mail);
@@ -169,24 +202,20 @@ public class DB {
                 String pwdHash = res.getString("motDePasse");
                 boolean authenticate = BCrypt.checkpw(mdpClair, pwdHash);
                 if (authenticate) {
-                    System.out.println("Vous êtes connecté");
                     DB.loggedUser = res.getInt("id");
                     DB.isDirecteur = res.getString("permission").equals("directeur");
-                    return true;
+                    DB.firstName = res.getString("prenom");
+                    return new DBRes(true);
                 } else {
-                    System.out.println("mot de passe et/ou email incorrect !");
-                    return false;
+                    return new DBRes(false, "Identifiants incorrects !");
                 }
             } else {
-                System.out.println("mot de passe et/ou email incorrect !");
-                return false;
+                return new DBRes(false, "Identifiants incorrects !");
             }
 
 
         } catch (SQLException e) {
-            System.out.println("ERREUR");
-            System.out.println(e.getMessage());
-            return false;
+            return new DBRes(false, "Erreur lors de la connexion : " + e.getMessage());
         }
     }
 
@@ -196,7 +225,7 @@ public class DB {
      * @param date La date de l'animation
      * @return Si l'animateur n'a pas dépassé la limite et peut donc animer l'activité
      */
-    public static boolean checkAnimLimit(int idAnimateur, String date) {
+    public static DBRes checkAnimLimit(int idAnimateur, String date) {
         String checkLimit = "SELECT Count(*) as number FROM anime WHERE idAnimateur=? AND date=?";
         try {
             PreparedStatement stmt = pdo.prepareStatement(checkLimit);
@@ -206,20 +235,16 @@ public class DB {
             if (res.next()) {
                 int nbAnim = res.getInt("number");
                 if (nbAnim >= 7) {
-//                    System.out.println("L'animateur a atteint ou dépassé la limite d'activités par jour ! ");
-                    return false;
+                    return new DBRes(false, "L'animateur a atteint ou dépassé la limite d'activités par jour ! ");
                 } else {
-                    return true;
+                    return new DBRes(true);
                 }
             } else {
-                System.out.println("L'animateur n'a pas été trouvé!");
-                return false;
+                return new DBRes(false, "L'animateur n'a pas été trouvé !");
             }
 
         } catch (SQLException e) {
-            System.out.println("ERREUR");
-            System.out.println(e.getMessage());
-            return false;
+            return new DBRes(false, "Erreur lors de la vérification de la limite d'animations : " + e.getMessage());
         }
     }
 
@@ -229,18 +254,16 @@ public class DB {
      * @param dureeEnMinutes La durée de l'activité en minutes
      * @return Si l'animation a bien été crée
      */
-    public static boolean createAnimation(String libelle, int dureeEnMinutes){
+    public static DBRes createAnimation(String libelle, int dureeEnMinutes){
         String newAnime= "INSERT INTO animation (libelle, duree) VALUES (?, ?)";
         try {
             PreparedStatement Animation = pdo.prepareStatement(newAnime);
             Animation.setString(1, libelle);
             Animation.setInt(2, dureeEnMinutes);
             Animation.executeUpdate();
-            return true;
+            return new DBRes(true);
         } catch (SQLException e) {
-            System.out.println("ERREUR");
-            System.out.println(e.getMessage());
-            return false;
+            return new DBRes(false, "Erreur lors de la création d'une animation : " + e.getMessage());
         }
     }
 
@@ -253,7 +276,21 @@ public class DB {
         return mail.matches("^((?!\\.)[\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$");
     }
 
-   
+    public static DBRes emailUsed(String mail) {
+        String sql = "SELECT id FROM utilisateur WHERE mail LIKE ?";
 
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, mail);
+            ResultSet res = req.executeQuery();
 
+            if (res.next())
+                return new DBRes(false, "Cet email est déjà utilisé !");
+            else
+                return new DBRes(true);
+        }
+        catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de la vérification de la présence de l'email : " + e.getMessage());
+        }
+    }
 }

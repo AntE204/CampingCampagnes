@@ -1,4 +1,6 @@
 config.json
+config_lycee.json
+config_maison.json
 
 target/
 !.mvn/wrapper/maven-wrapper.jar

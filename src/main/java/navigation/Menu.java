@@ -13,6 +13,8 @@ public class Menu extends TitleDesc {
     private final Choice[] choices;
     private int choice_index;
 
+    private static String popup = null;
+
     public Menu(String title, String desc, Choice[] choices, int choice_index) {
         super(title, desc);
         this.choices = choices;
@@ -136,6 +138,12 @@ public class Menu extends TitleDesc {
         if (this.get_desc() != null)
             IO.println(TextDeco.AQUA + this.get_desc());
 
+        // Popup
+        if (Menu.popup != null) {
+            IO.println(Menu.popup);
+            Menu.popup = null;
+        }
+
         IO.print("\n");
 
         for (int i = 0; i < this.choices.length; i++) {
@@ -233,5 +241,13 @@ public class Menu extends TitleDesc {
             tries++;
         }
         while (!this.choices[this.choice_index].get_state());
+    }
+
+    /**
+     * Définit le message popup, c'est-à-dire le message à montrer loresr de l'affichage du prochain menu
+     * @param message Le message à montrer
+     */
+    public static void set_popup(String message) {
+        Menu.popup = message;
     }
 }
