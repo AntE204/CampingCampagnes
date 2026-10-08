@@ -1,16 +1,21 @@
 package utils;
 
-import dbres.DBDeleteAccount;
-import dbres.DBRes;
+import dbres.*;
+import models.Animation;
+import models.Animator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mindrot.jbcrypt.BCrypt;
 
+import javax.xml.transform.Result;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.spec.DSAGenParameterSpec;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DB {
     private static Connection pdo = null;
@@ -296,6 +301,11 @@ public class DB {
         }
     }
 
+    /**
+     * Vérifie si une animation existe, insensible à la casse
+     * @param name Le nom de l'animation à vérifier
+     * @return Si l'animation existe
+     */
     public static DBRes animationExists(String name) {
         String sql = "SELECT libelle FROM animation WHERE libelle LIKE ?";
 
@@ -311,6 +321,106 @@ public class DB {
         }
         catch (SQLException e) {
             return new DBRes(false, "Erreur lors de la vérification de l'existence d'une animation : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Récupère toutes les animations
+     * @return Une liste de toues les animations
+     */
+    public static DBAllAnimations getAllAnimations() {
+        String sql = "SELECT * FROM animation";
+        List<Animation> animations = new ArrayList<>();
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            ResultSet res = req.executeQuery();
+
+            while (res.next()) {
+                Animation anim = new Animation(
+                    res.getString("libelle"),
+                    res.getInt("duree")
+                );
+                animations.add(anim);
+            }
+
+            return new DBAllAnimations(true, null, animations);
+        }
+        catch (SQLException e) {
+            return new DBAllAnimations(false, "Erreur lors de la récupération de toutes les animations : " + e.getMessage(), null);
+        }
+    }
+
+    /**
+     * Récupère une animation par son nom
+     * @param name Le nom de l'animation
+     * @return L'animation récupérée
+     */
+    public static DBSingleAnimation getAnimationByName(String name) {
+        String sql = "SELECT * FROM animation WHERE libelle LIKE ?";
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, name);
+            ResultSet res = req.executeQuery();
+
+            if (res.next()) {
+                Animation anim = new Animation(
+                    res.getString("libelle"),
+                    res.getInt("duree")
+                );
+                return new DBSingleAnimation(true, null, anim);
+            }
+            else
+                return new DBSingleAnimation(false, "Aucune animation ne possède l'intitulé \"" + name + "\".", null);
+        }
+        catch (SQLException e) {
+            return new DBSingleAnimation(false, "Erreur lors de la récupération d'une animation : " + e.getMessage(), null);
+        }
+    }
+
+    /**
+     * Ajoute un animateur à une animation
+     * @param animationName Le nom de l'animation
+     * @param animatorEmail L'email de l'animateur
+     * @return Si l'animateur a pu être ajouté, en prennant en compte les limites (pas 2 en même temps, pas + de 7 par jour)
+     */
+    public static DBRes addAnimatorToAnimation(String animationName, String animatorEmail) {
+        // TODO
+    }
+
+    /**
+     * Récupère tous les animateurs
+     * @return Une liste de tous les animateurs, directeurs compris
+     */
+    public static DBAllAnimators getAllAnimators() {
+        String sql = "SELECT * FROM utilisateur";
+        List<Animator> animators = new ArrayList<>();
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            ResultSet res = req.executeQuery();
+
+            while (res.next()) {
+                Animator animator = new Animator(
+                    res.getInt("id"),
+                    res.getString("mail"),
+                    res.getString("prenom"),
+                    res.getString("nom"),
+                    res.getString("rue"),
+                    res.getString("ville"),
+                    res.getString("codePostal"),
+                    res.getString("telephone"),
+                    res.getString("permission").equals("directeur")
+                );
+
+                animators.add(animator);
+            }
+
+            return new DBAllAnimators(true, null, animators);
+        }
+        catch (SQLException e) {
+            return new DBAllAnimators(false, "Erreur lors de la récupération de tous les animateurs : " + e.getMessage(), null);
         }
     }
 

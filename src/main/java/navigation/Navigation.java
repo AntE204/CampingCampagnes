@@ -1,6 +1,7 @@
 package navigation;
-import dbres.DBDeleteAccount;
-import dbres.DBRes;
+import dbres.*;
+import models.Animation;
+import models.Animator;
 import utils.DB;
 import utils.Input;
 import utils.TextDeco;
@@ -193,6 +194,47 @@ public class Navigation {
     }
 
     public static void set_animators() {
+        // Récupère toutes les animations
+        DBAllAnimations res_animations = DB.getAllAnimations();
+        if (!res_animations.ok) {
+            Menu.set_popup(res_animations.error);
+            return;
+        }
+
+        // Récupère tous les animateurs
+        DBAllAnimators res_animators = DB.getAllAnimators();
+        if (!res_animators.ok) {
+            Menu.set_popup(res_animators.error);
+            return;
+        }
+
+        // Affiche chaque animation
+        for (Animation anim : res_animations.animations) {
+            IO.println(anim.get_info());
+        }
+
+        // Demande nom de l'anim à l'utilisateur
+        String edit_anim_name = Input.get_string("Nom de l'animation à modifier (vide pour quitter) : ");
+        if (edit_anim_name.isEmpty())
+            return;
+
+        // Récup l'animation par son nom
+        dbres.DBSingleAnimation res_anim = DB.getAnimationByName(edit_anim_name);
+        if (!res_anim.ok) {
+            Menu.set_popup(res_anim.error);
+            return;
+        }
+
+        // Choix ajouter / retirer
+        boolean is_add = Input.get_bool("Voulez-vous ajouter ou retirer des animateurs ? (+/-) : ", '+', '-');
+
+        // Affiche les animateurs
+        for (Animator animator : res_animators.animators)
+            IO.println(animator);
+
+        // Demande les emails
+        String all_emails = Input.get_string("Saissiez l'email des animateurs à " + (is_add ? "ajouter" : "retirer") + "de l'animation " + res_anim.animation.get_info() + ", avec un espace comme séparateur :");
+        String[] emails = all_emails.split(" ");
         // TODO
     }
 
