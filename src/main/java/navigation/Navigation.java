@@ -5,6 +5,7 @@ import models.Animator;
 import utils.DB;
 import utils.Input;
 import utils.TextDeco;
+import utils.TimeUtils;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -214,7 +215,7 @@ public class Navigation {
         }
 
         // Demande nom de l'anim à l'utilisateur
-        String edit_anim_name = Input.get_string("Nom de l'animation à modifier (vide pour quitter) : ");
+        String edit_anim_name = Input.get_string("Saisissez le nom (sans la durée) de l'animation à modifier (vide pour quitter) : ");
         if (edit_anim_name.isEmpty())
             return;
 
@@ -227,15 +228,41 @@ public class Navigation {
 
         // Choix ajouter / retirer
         boolean is_add = Input.get_bool("Voulez-vous ajouter ou retirer des animateurs ? (+/-) : ", '+', '-');
+        IO.print("\n");
 
         // Affiche les animateurs
         for (Animator animator : res_animators.animators)
-            IO.println(animator);
+            IO.println(animator.get_info());
 
         // Demande les emails
-        String all_emails = Input.get_string("Saissiez l'email des animateurs à " + (is_add ? "ajouter" : "retirer") + "de l'animation " + res_anim.animation.get_info() + ", avec un espace comme séparateur :");
+        String all_emails = Input.get_string("Saissiez l'email des animateurs à " + (is_add ? "ajouter dans" : "retirer de") + " l'animation \"" + res_anim.animation.get_info() + "\", avec un espace comme séparateur :\n");
         String[] emails = all_emails.split(" ");
-        // TODO
+
+        // Demande la date et l'heure de l'animation
+        String date_time = null;
+        while (is_add) {
+            date_time = Input.get_string("Date et heure de l'animation (format aaaa-mm-jj hh:mm) : ");
+
+            if (TimeUtils.is_date_time_valid(date_time))
+                break;
+
+            IO.println("Le format de la date n'est pas valide !");
+        }
+
+        // Ajoute les animateurs
+        for (String email : emails) {
+            if (is_add) {
+                DBRes res = DB.addAnimatorToAnimation(edit_anim_name, email, date_time);
+                IO.println(res.ok ? (email + " anime désormais " + edit_anim_name) : res.error);
+            }
+            else {
+                DBRes res = DB.removeAnimatorFromAnimation(edit_anim_name, email);
+                IO.println(res.ok ? (email + " n'anime plus " + edit_anim_name) : res.error);
+            }
+        }
+
+        // Attend un input utilisateur
+        Input.get_string("Terminé. Appuyez sur Entrer pour continuer.");
     }
 
     public static void send_plannings() {

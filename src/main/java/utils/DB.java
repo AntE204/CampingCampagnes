@@ -338,6 +338,7 @@ public class DB {
 
             while (res.next()) {
                 Animation anim = new Animation(
+                    res.getInt("id"),
                     res.getString("libelle"),
                     res.getInt("duree")
                 );
@@ -366,6 +367,7 @@ public class DB {
 
             if (res.next()) {
                 Animation anim = new Animation(
+                    res.getInt("id"),
                     res.getString("libelle"),
                     res.getInt("duree")
                 );
@@ -383,10 +385,48 @@ public class DB {
      * Ajoute un animateur à une animation
      * @param animationName Le nom de l'animation
      * @param animatorEmail L'email de l'animateur
+     * @param date_time La date et l'heure au format dd/MM/yyyy hh:mm:ss
      * @return Si l'animateur a pu être ajouté, en prennant en compte les limites (pas 2 en même temps, pas + de 7 par jour)
      */
-    public static DBRes addAnimatorToAnimation(String animationName, String animatorEmail) {
-        // TODO
+    public static DBRes addAnimatorToAnimation(String animationName, String animatorEmail, String date_time) {
+        String sql = "INSERT INTO anime (idAnimateur, idAnimation, date) VALUES ((SELECT id FROM utilisateur WHERE mail LIKE ?), (SELECT id FROM animation WHERE libelle LIKE ?), ?)";
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, animatorEmail);
+            req.setString(2, animationName);;
+            req.setString(3, date_time + ":00");
+            boolean added = req.executeUpdate() == 1;
+            // TODO vérifier si un animateur n'anime pas 2 fois en même temps
+            // TODO vérifier si limite d'animation par jour atteinte
+
+            if (added)
+                return new DBRes(true);
+            else
+                return new DBRes(false, animatorEmail + " n'a pas pu être ajouté.");
+        }
+        catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de l'attribution d'un animateur à une naimation : " + e.getMessage());
+        }
+    }
+
+    public static DBRes removeAnimatorFromAnimation(String animationName, String animatorEmail) {
+        String sql = "DELETE FROM anime WHERE idAnimateur = (SELECT id FROM utilisateur WHERE mail LIKE ?) AND idAnimation = (SELECT id FROM animation WHERE libelle LIKE ?)";
+
+        try {
+            PreparedStatement req = pdo.prepareStatement(sql);
+            req.setString(1, animatorEmail);
+            req.setString(2, animationName);
+            boolean deleted = req.executeUpdate() > 0;
+
+            if (deleted)
+                return new DBRes(true);
+            else
+                return new DBRes(false, "L'animateur " + animatorEmail + " n'a pas pu être supprimé de l'animation " + animationName);
+        }
+        catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de la suppression d'un animateur à une animation " + e.getMessage());
+        }
     }
 
     /**
@@ -433,6 +473,11 @@ public class DB {
         return mail.matches("^((?!\\.)[\\w\\-_.]*[^.])(@\\w+)(\\.\\w+(\\.\\w+)?[^.\\W])$");
     }
 
+    /**
+     * Vérifie si un email est déjà utilisé par un utilisateur inscrit
+     * @param mail L'email à tester
+     * @return Si l'email est utilisé
+     */
     public static DBRes emailUsed(String mail) {
         String sql = "SELECT id FROM utilisateur WHERE mail LIKE ?";
 
