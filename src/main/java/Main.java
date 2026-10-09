@@ -20,7 +20,7 @@ public class Main {
 
         // Demande à créer un compte directeur si aucun n'existent
         if (DB.noDirectorAccount())
-            if (!Navigation.register_account(true, null))
+            if (!Navigation.register_account(true, "directeur", null))
                 exit(1);
 
         // Demande nom et mdp, quitte si ne parvient pas à se connecter au compte
@@ -33,10 +33,10 @@ public class Main {
             stay = !main_choice.equals("Quitter");
 
             if (main_choice.equals("Créer un compte"))
-                Navigation.register_account(false, null);
+                Navigation.register_account(false, null, null);
 
             else if (main_choice.equals("Modifier un compte"))
-                Navigation.edit_an_account();
+                Navigation.edit_an_account(null, true);
 
             else if (main_choice.equals("Supprimer un compte")) {
                 if (Navigation.delete_account())

@@ -22,6 +22,7 @@ public class DB {
     public static Integer loggedUser = null;
     public static boolean isDirecteur = false;
     public static String firstName = null;
+    public static String myEmail = null;
 
     /**
      * Fonction pour initialiser la base de données
@@ -227,7 +228,7 @@ public class DB {
      * @return Si l'utilisateur a bien pu se connecter
      */
     public static DBRes connexion(String mail, String mdpClair) {
-        String checkpwd = "SELECT id, prenom, motDePasse, permission FROM utilisateur WHERE mail=?";
+        String checkpwd = "SELECT id, mail, prenom, motDePasse, permission FROM utilisateur WHERE mail=?";
         try {
             PreparedStatement check = pdo.prepareStatement(checkpwd);
             check.setString(1, mail);
@@ -239,6 +240,7 @@ public class DB {
                     DB.loggedUser = res.getInt("id");
                     DB.isDirecteur = res.getString("permission").equals("directeur");
                     DB.firstName = res.getString("prenom");
+                    DB.myEmail = res.getString("mail");
                     return new DBRes(true);
                 } else {
                     return new DBRes(false, "Identifiants incorrects !");

@@ -51,12 +51,18 @@ public class Navigation {
 
     /**
      * Permet de créer ou modifier un compte en demandant les informations
-     * @param force_director Si le compte créé est le 1er compte de la base (forcément directeur)
+     * @param force_permission Force la permission, null pour la demander
      * @param old_email En cas de modification de compte, l'ancien email de l'utilisateur
      */
-    public static boolean register_account(boolean force_director, String old_email) {
-        if (force_director)
+    public static boolean register_account(boolean first_time, String force_permission, String old_email) {
+        boolean force_director = force_permission != null && force_permission.equals("directeur");
+        boolean force_animator = force_permission != null && force_permission.equals("animateur");
+
+        if (first_time) {
+            force_director = true;
+            force_animator = false;
             IO.println("Aucun compte directeur n'existe dans la base de données. Veuillez en créer un.");
+        }
 
         // Email
         String email;
@@ -94,7 +100,7 @@ public class Navigation {
         String town = Input.get_string("Ville : ");
         String zip_code = Input.get_string("Code postal : ");
         String phone = Input.get_string("Numéro de téléphone (facultatif) : ");
-        boolean is_director = force_director || Input.get_bool("Compte directeur ? (o/n) : ", 'o', 'n');
+        boolean is_director = force_director || (!force_animator && Input.get_bool("Compte directeur ? (o/n) : ", 'o', 'n'));
 
         // Insert ou update
         DBRes res;
@@ -106,7 +112,7 @@ public class Navigation {
         // Popup en cas de succès
         if (res.ok) {
             String popup = "Le compte de " + first_name + " " + last_name + " a été " + (old_email == null ? "créé" : "modifié") + " !";
-            if (force_director)
+            if (first_time)
                 popup += " Veuillez vous y connecter.";
             Menu.set_popup(popup);
         }
@@ -144,8 +150,12 @@ public class Navigation {
     /**
      * Demande les informations d'un compte à modifier
      */
-    public static void edit_an_account() {
-        String old_email = Input.get_string("Entrez l'email du compte à modifier : ");
+    public static void edit_an_account(String force_email, boolean reask_permission) {
+        String old_email;
+        if (force_email == null)
+            old_email = Input.get_string("Entrez l'email du compte à modifier : ");
+        else
+            old_email = force_email;
 
         // Email pas utilisé
         if (!DB.verifMail(old_email)) {
@@ -153,7 +163,7 @@ public class Navigation {
             return;
         }
 
-        Navigation.register_account(false, old_email);
+        Navigation.register_account(false, reask_permission ? null : (DB.isDirecteur ? "directeur" : "animateur"), old_email);
     }
 
     /**
@@ -270,7 +280,7 @@ public class Navigation {
     }
 
     public static void edit_my_account() {
-        // TODO
+        Navigation.edit_an_account(DB.myEmail, false);
     }
 
     public static void receive_my_planning() {
