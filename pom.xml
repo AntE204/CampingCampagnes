@@ -23,6 +23,11 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.mailjet</groupId>
+            <artifactId>mailjet-client</artifactId>
+            <version>5.2.5</version>
+        </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.jline/jline -->
         <dependency>
             <groupId>org.jline</groupId>

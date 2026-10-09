@@ -14,7 +14,18 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
+import com.mailjet.client.ClientOptions;
+import com.mailjet.client.MailjetClient;
+import com.mailjet.client.MailjetRequest;
+import com.mailjet.client.MailjetResponse;
+import com.mailjet.client.resource.Emailv31;
+import org.json.JSONArray;
+import org.json.JSONObject;
 public class Utils {
     public static byte[] genererPDF (LocalDateTime dateDebut, LocalDateTime dateFin, int idAnimateur){
         final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -86,5 +97,46 @@ public class Utils {
 
         }
         return out.toByteArray();
+    }
+
+    public static void envoiMail(LocalDateTime dateDebut, LocalDateTime dateFin, int idAnimateur){
+        ClientOptions options = ClientOptions.builder()
+                .apiKey("")
+                .apiSecretKey("")
+                .build();
+
+
+        MailjetClient client = new MailjetClient(options);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateDebut= LocalDateTime.parse("2026-10-08 00:00:00", formatter);
+        LocalDateTime dateFin= LocalDateTime.parse("2026-10-15 00:00:00", formatter);
+        byte[] fileContent = DB.genererPDF(dateDebut, dateFin, 7);
+        String encodedPdf = Base64.getEncoder().encodeToString(fileContent);
+        JSONObject attachment = new JSONObject()
+                .put("ContentType", "application/pdf")
+                .put("Filename", "planning.pdf")
+                .put("Base64Content", encodedPdf);
+        MailjetRequest request = new MailjetRequest(Emailv31.resource)
+                .property(Emailv31.MESSAGES, new JSONArray()
+                        .put(new JSONObject()
+                                .put(Emailv31.Message.FROM, new JSONObject()
+                                        .put("Email", "tiago.guedesl2pda@gmail.com")
+                                        .put("Name", "Tiago Guedes"))
+                                .put(Emailv31.Message.TO, new JSONArray()
+                                        .put(new JSONObject()
+                                                .put("Email", "titi.jeej@gmail.com")
+                                                .put("Name", "Destinataire")))
+                                .put(Emailv31.Message.SUBJECT, "Sujet de test Java")
+                                .put(Emailv31.Message.TEXTPART, "Bonjour, test en texte brut.")
+                                .put(Emailv31.Message.HTMLPART, "<h3>Bonjour</h3><p>Ceci est dgdgdgdg un test en HTML.</p><button onclick='alert(1)'>Bonjour</button><h1>TEST</h1>")
+                                .put(Emailv31.Message.ATTACHMENTS, new JSONArray().put(attachment))));
+
+        try {
+            MailjetResponse response = client.post(request);
+            System.out.println("Statut : " + response.getStatus());
+            System.out.println("Données : " + response.getData());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
