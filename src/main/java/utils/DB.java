@@ -428,6 +428,12 @@ public class DB {
         }
     }
 
+    /**
+     * Fonction permettant de retirer un animateur d'une animation
+     * @param animationName String qui représente le libelle d'une animation
+     * @param animatorEmail String qui représente le mail de l'animateur
+     * @return true si la suppression s'est effectuée, false avec un message d'erreur sinon
+     */
     public static DBRes removeAnimatorFromAnimation(String animationName, String animatorEmail) {
         String sql = "DELETE FROM anime WHERE idAnimateur = (SELECT id FROM utilisateur WHERE mail LIKE ?) AND idAnimation = (SELECT id FROM animation WHERE libelle LIKE ?)";
 
@@ -514,6 +520,14 @@ public class DB {
         }
     }
 
+
+    /**
+     * Fonction qui va générer un planning en PDF à partir des paramètres, contenant les activités sur une période donnée
+     * @param dateDebut LocalDateTime qui représente la date de début de la période pour laquelle on génére le planning
+     * @param dateFin LocalDateTime qui représente la date de fin de la période pour laquelle on génére le planning
+     * @param idAnimateur int qui va nous permettre de récuperer les activités de l'animateur concerné avec son nom et prénom pour mettre dans le PDF
+     * @return
+     */
     public static byte[] genererPDF(LocalDateTime dateDebut,
                                     LocalDateTime dateFin,
                                     int idAnimateur) {
@@ -652,6 +666,12 @@ public class DB {
         }
     }
 
+    /**
+     * Fonction pour envoyer un mail, contenant un pdf généré à partir des paramètres
+     * @param dateDebut LocalDateTime qui représente la date de début de la période sur laquelle on veut générer le planning
+     * @param dateFin   LocalDateTime qui reprèsente la date de fin de la période sur laquelle on veut générer le planning
+     * @param idAnimateur int qui indique l'id de l'animateur pour lequel on veut générer le planning
+     */
     public static void envoiMail(LocalDateTime dateDebut,
                                  LocalDateTime dateFin,
                                  int idAnimateur) {
