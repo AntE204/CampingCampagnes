@@ -1,3 +1,4 @@
+import models.Config;
 import navigation.Menu;
 import navigation.Navigation;
 import utils.DB;
@@ -5,18 +6,24 @@ import utils.DB;
 import java.time.LocalDateTime;
 
 public class Main {
-    public static String test = null;
-
     public static void main(String[] args) {
+        // Récupère la config
+        Config config = new Config("./config.json");
+        if (!config.is_valid()) {
+            config.print_error();
+            exit(1);
+        }
+
         // Connexion à la DB
-        if (!DB.init())
+        if (!DB.init(config))
             exit(1);
 
         // Init le terminal
         if (!Menu.init_terminal())
             exit(1);
 
-        DB.envoiMail(LocalDateTime.parse("2026-10-12T00:00:00"), LocalDateTime.parse("2026-10-18T00:00:00"), 9);
+        // DB.envoiMail(LocalDateTime.parse("2026-10-12T00:00:00"), LocalDateTime.parse("2026-10-18T00:00:00"), 9);
+
         // Menu : Se connecter / Quitter
         if (Navigation.menu_login().equals("Quitter"))
             exit(0);

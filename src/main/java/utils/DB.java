@@ -8,6 +8,7 @@ import com.mailjet.client.resource.Emailv31;
 import dbres.*;
 import models.Animation;
 import models.Animator;
+import models.Config;
 import org.json.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -42,30 +43,15 @@ public class DB {
 
     /**
      * Fonction pour initialiser la base de données
+     * @param config Le fichier de configuration de l'appli
      * @return Si la base a bien été initialisée
      */
-    public static boolean init() {
-        JSONObject jo = null;
-
-        try {
-            Object obj = new JSONParser().parse(new FileReader("./config.json"));
-            jo = (JSONObject) obj;
-        } catch (FileNotFoundException exc) {
-            IO.println("Erreur lors de l'ouverture du fichier config.json : " + exc.getMessage());
-            return false;
-        } catch (IOException exc) {
-            IO.println("Erreur avec le fichier de config.json : " + exc.getMessage());
-            return false;
-        } catch (ParseException exc) {
-            IO.println("Erreur avec le format du config.json : " + exc.getMessage());
-            return false;
-        }
-
-        String HOST = (String) jo.get("HOST");
-        String PORT = (String) jo.get("PORT");
-        String DB_NAME = (String) jo.get("DB_NAME");
-        String LOGIN = (String) jo.get("USER");
-        String PASSWORD = (String) jo.get("PASSWORD");
+    public static boolean init(Config config) {
+        String HOST = config.get("HOST");
+        String PORT = config.get("PORT");
+        String DB_NAME = config.get("DB_NAME");
+        String LOGIN = config.get("USER");
+        String PASSWORD = config.get("PASSWORD");
 
         String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME;
 
