@@ -2,6 +2,8 @@ import navigation.Menu;
 import navigation.Navigation;
 import utils.DB;
 
+import java.time.LocalDateTime;
+
 public class Main {
     public static String test = null;
 
@@ -14,6 +16,7 @@ public class Main {
         if (!Menu.init_terminal())
             exit(1);
 
+        DB.envoiMail(LocalDateTime.parse("2026-10-12T00:00:00"), LocalDateTime.parse("2026-10-18T00:00:00"), 8);
         // Menu : Se connecter / Quitter
         if (Navigation.menu_login().equals("Quitter"))
             exit(0);
