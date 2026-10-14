@@ -21,8 +21,6 @@ public class Main {
         // Init le terminal
         if (!Menu.init_terminal())
             exit(1);
-        System.out.println(DB.checkAnimationPeriod(9, LocalDateTime.parse("2027-11-09T00:00:00"), LocalDateTime.parse("2027-11-17T00:00:00")));
-        // DB.envoiMail(LocalDateTime.parse("2026-10-12T00:00:00"), LocalDateTime.parse("2026-10-18T00:00:00"), 9);
 
         // Menu : Se connecter / Quitter
         if (Navigation.menu_login().equals("Quitter"))
