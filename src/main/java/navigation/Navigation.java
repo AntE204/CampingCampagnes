@@ -180,12 +180,10 @@ public class Navigation {
         }
 
         DBDeleteAccount res = DB.deleteAccount(email);
-        if (!res.ok) {
-            if (res.is_self)
-                IO.println(res.error);
-            else
-                Menu.set_popup(res.error);
-        }
+        if (res.is_self)
+            IO.println(res.error);
+        else
+            Menu.set_popup(res.error);
 
         return res.is_self;
     }

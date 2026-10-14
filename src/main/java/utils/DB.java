@@ -197,7 +197,7 @@ public class DB {
             req_delete.setString(1, email);
             boolean deleted = req_delete.executeUpdate() == 1;
 
-            return new DBDeleteAccount(deleted, !deleted ? null : "L'utilisateur n'a pas pu être supprimé.", is_self);
+            return new DBDeleteAccount(deleted, deleted ? "L'utilisateur a bien été supprimé." : "L'utilisateur n'a pas pu être supprimé car il a déjà animé une activité.", is_self);
         }
         catch (SQLException e) {
             return new DBDeleteAccount(false, "Erreur lors de la suppression de l'utilisateur : " + e.getMessage(), false);

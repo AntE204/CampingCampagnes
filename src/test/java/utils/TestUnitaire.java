@@ -77,6 +77,8 @@ class TestUnitaire {
             req_delete.setInt(1, id_compte);
             int res_delete = req_delete.executeUpdate();
             Assert.assertEquals("Supression du compte échouée", res_delete, 1);
+
+            DB.close();
         }
         catch (Exception ex) {
             Assert.fail("Exception lors du test du compte : " + ex.getMessage());
