@@ -145,8 +145,16 @@ public class DB {
 
             boolean res = req.executeUpdate() == 1;
 
-            if (res)
+            if (res) {
+                boolean is_self = oldEmail.equals(DB.myEmail);
+                if (is_self) {
+                    DB.myEmail = mail;
+                    DB.firstName = prenom;
+                    DB.isDirecteur = isDirector;
+                }
+
                 return new DBRes(true);
+            }
             else
                 return new DBRes(false, "L'email ne correspond à aucun utilisateur.");
         }
