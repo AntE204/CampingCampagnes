@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:3306
--- Généré le : ven. 02 oct. 2026 à 12:18
+-- Généré le : mer. 14 oct. 2026 à 11:03
 -- Version du serveur : 10.11.14-MariaDB-0+deb12u2
 -- Version de PHP : 8.2.29
 
@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `animation` (
   `id` int(11) NOT NULL,
-  `libelle` varchar(500) NOT NULL,
+  `libelle` varchar(255) NOT NULL,
   `duree` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -40,10 +40,10 @@ CREATE TABLE `animation` (
 --
 
 CREATE TABLE `anime` (
+  `id` int(11) NOT NULL,
   `idAnimateur` int(11) NOT NULL,
   `idAnimation` int(11) NOT NULL,
-  `actif` tinyint(1) NOT NULL,
-  `date` date NOT NULL
+  `date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -79,7 +79,9 @@ ALTER TABLE `animation`
 -- Index pour la table `anime`
 --
 ALTER TABLE `anime`
-  ADD PRIMARY KEY (`idAnimateur`,`idAnimation`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idAnimateur` (`idAnimateur`),
+  ADD KEY `idAnimation` (`idAnimation`);
 
 --
 -- Index pour la table `utilisateur`
@@ -98,10 +100,27 @@ ALTER TABLE `animation`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT pour la table `anime`
+--
+ALTER TABLE `anime`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT pour la table `utilisateur`
 --
 ALTER TABLE `utilisateur`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `anime`
+--
+ALTER TABLE `anime`
+  ADD CONSTRAINT `anime_ibfk_1` FOREIGN KEY (`idAnimateur`) REFERENCES `utilisateur` (`id`),
+  ADD CONSTRAINT `anime_ibfk_2` FOREIGN KEY (`idAnimation`) REFERENCES `animation` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
