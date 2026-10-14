@@ -5,7 +5,6 @@ import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.resource.Emailv31;
-import dbres.DBRes;
 import models.Config;
 import org.json.JSONArray;
 import org.openpdf.text.*;

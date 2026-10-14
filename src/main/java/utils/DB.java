@@ -1,37 +1,15 @@
 package utils;
 
-import com.mailjet.client.ClientOptions;
-import com.mailjet.client.MailjetClient;
-import com.mailjet.client.MailjetRequest;
-import com.mailjet.client.MailjetResponse;
-import com.mailjet.client.resource.Emailv31;
 import dbres.*;
 import models.Animation;
 import models.Animator;
 import models.Config;
-import org.json.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.mindrot.jbcrypt.BCrypt;
 import org.openpdf.text.*;
-import org.openpdf.text.Font;
-import org.openpdf.text.pdf.PdfPCell;
-import org.openpdf.text.pdf.PdfPTable;
-import org.openpdf.text.pdf.PdfWriter;
-
-import javax.xml.transform.Result;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.security.spec.DSAGenParameterSpec;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 public class DB {
@@ -254,35 +232,6 @@ public class DB {
 
         } catch (SQLException e) {
             return new DBRes(false, "Erreur lors de la connexion : " + e.getMessage());
-        }
-    }
-
-    /**
-     * Fonction pour checker qu'un animateur n'a pas dépassé la limite d'animations par jour
-     * @param idAnimateur L'id de l'animateur duquel on va vérifier le nombre d'animations
-     * @param date La date de l'animation
-     * @return Si l'animateur n'a pas dépassé la limite et peut donc animer l'activité
-     */
-    public static DBRes checkAnimLimit(int idAnimateur, String date) {
-        String checkLimit = "SELECT Count(*) as number FROM anime WHERE idAnimateur=? AND date=?";
-        try {
-            PreparedStatement stmt = pdo.prepareStatement(checkLimit);
-            stmt.setInt(1, idAnimateur);
-            stmt.setString(2, date);
-            ResultSet res = stmt.executeQuery();
-            if (res.next()) {
-                int nbAnim = res.getInt("number");
-                if (nbAnim >= 7) {
-                    return new DBRes(false, "L'animateur a atteint ou dépassé la limite d'activités par jour ! ");
-                } else {
-                    return new DBRes(true);
-                }
-            } else {
-                return new DBRes(false, "L'animateur n'a pas été trouvé !");
-            }
-
-        } catch (SQLException e) {
-            return new DBRes(false, "Erreur lors de la vérification de la limite d'animations : " + e.getMessage());
         }
     }
 

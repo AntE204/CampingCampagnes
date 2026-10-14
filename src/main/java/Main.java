@@ -3,8 +3,6 @@ import navigation.Menu;
 import navigation.Navigation;
 import utils.DB;
 
-import java.time.LocalDateTime;
-
 public class Main {
     public static void main(String[] args) {
         // Récupère la config
