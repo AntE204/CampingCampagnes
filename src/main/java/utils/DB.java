@@ -55,6 +55,7 @@ public class DB {
 
         String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DB_NAME;
 
+
         try {
             DB.pdo = DriverManager.getConnection(URL, LOGIN, PASSWORD);
             return true;
@@ -388,28 +389,69 @@ public class DB {
      * Ajoute un animateur à une animation
      * @param animationName Le nom de l'animation
      * @param animatorEmail L'email de l'animateur
-     * @param date_time La date et l'heure au format dd/MM/yyyy hh:mm:ss
+     * @param date_time La date et l'heure au format yyyy-MM-dd hh:mm:ss
      * @return Si l'animateur a pu être ajouté, en prennant en compte les limites (pas 2 en même temps, pas + de 7 par jour)
      */
     public static DBRes addAnimatorToAnimation(String animationName, String animatorEmail, String date_time) {
-        String sql = "INSERT INTO anime (idAnimateur, idAnimation, date) VALUES ((SELECT id FROM utilisateur WHERE mail LIKE ?), (SELECT id FROM animation WHERE libelle LIKE ?), ?)";
+        String getDurationSql = "SELECT id, duree FROM animation WHERE libelle LIKE ?";
+        String checkOverlapSql = "SELECT 1 FROM anime a " +
+                "INNER JOIN animation an ON a.idAnimation = an.id " +
+                "WHERE a.idAnimateur = (SELECT id FROM utilisateur WHERE mail LIKE ?) " +
+                "AND ? < DATE_ADD(a.date, INTERVAL an.duree MINUTE) " +
+                "AND a.date < DATE_ADD(?, INTERVAL ? MINUTE)";
+        String checkLimitSql = "SELECT COUNT(*) AS counter FROM anime " +
+                "WHERE idAnimateur = (SELECT id FROM utilisateur WHERE mail LIKE ?) " +
+                "AND date >= DATE(?) AND date < DATE_ADD(DATE(?), INTERVAL 1 DAY)";
+        String insertSql = "INSERT INTO anime (idAnimateur, idAnimation, date) VALUES ((SELECT id FROM utilisateur WHERE mail LIKE ?), ?, ?)";
 
         try {
-            PreparedStatement req = pdo.prepareStatement(sql);
-            req.setString(1, animatorEmail);
-            req.setString(2, animationName);;
-            req.setString(3, date_time + ":00");
-            boolean added = req.executeUpdate() == 1;
-            // TODO vérifier si un animateur n'anime pas 2 fois en même temps
-            // TODO vérifier si limite d'animation par jour atteinte
+            String startDateTime = date_time + ":00";
 
-            if (added)
+            // Récup infos de l'animation
+            PreparedStatement getAnim = pdo.prepareStatement(getDurationSql);
+            getAnim.setString(1, animationName);
+            ResultSet resAnim = getAnim.executeQuery();
+            if (!resAnim.next()) {
+                return new DBRes(false, "L'animation '" + animationName + "' n'existe pas.");
+            }
+            int newAnimId = resAnim.getInt("id");
+            int newAnimDuration = resAnim.getInt("duree");
+
+            // Chevauchement d'horaires
+            PreparedStatement checkOverlap = pdo.prepareStatement(checkOverlapSql);
+            checkOverlap.setString(1, animatorEmail);
+            checkOverlap.setString(2, startDateTime);
+            checkOverlap.setString(3, startDateTime);
+            checkOverlap.setInt(4, newAnimDuration);
+            ResultSet resOverlap = checkOverlap.executeQuery();
+            if (resOverlap.next()) {
+                return new DBRes(false, animatorEmail + " anime déjà une autre activité sur ce créneau horaire.");
+            }
+
+            // Limite de 7 anims par jour
+            PreparedStatement checkLimit = pdo.prepareStatement(checkLimitSql);
+            checkLimit.setString(1, animatorEmail);
+            checkLimit.setString(2, startDateTime);
+            checkLimit.setString(3, startDateTime);
+            ResultSet resLimit = checkLimit.executeQuery();
+            if (resLimit.next() && resLimit.getInt("counter") >= 7) {
+                return new DBRes(false, animatorEmail + " anime déjà 7 activités ou plus ce jour-là.");
+            }
+
+            // Attribution de l'animation
+            PreparedStatement req = pdo.prepareStatement(insertSql);
+            req.setString(1, animatorEmail);
+            req.setInt(2, newAnimId);
+            req.setString(3, startDateTime);
+
+            if (req.executeUpdate() == 1) {
                 return new DBRes(true);
-            else
+            } else {
                 return new DBRes(false, animatorEmail + " n'a pas pu être ajouté.");
-        }
-        catch (SQLException e) {
-            return new DBRes(false, "Erreur lors de l'attribution d'un animateur à une naimation : " + e.getMessage());
+            }
+
+        } catch (SQLException e) {
+            return new DBRes(false, "Erreur lors de l'attribution de l'animateur : " + e.getMessage());
         }
     }
 
