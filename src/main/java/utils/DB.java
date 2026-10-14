@@ -1,5 +1,6 @@
 package utils;
 
+import com.aayushatharva.brotli4j.common.annotations.Local;
 import com.mailjet.client.ClientOptions;
 import com.mailjet.client.MailjetClient;
 import com.mailjet.client.MailjetRequest;
@@ -779,6 +780,20 @@ public class DB {
 
         } catch (SQLException e) {
             throw new RuntimeException("Erreur SQL lors de la récupération de l'animateur", e);
+        }
+    }
+
+    public static boolean checkAnimationPeriod(int idAnimateur, LocalDateTime dateDebut, LocalDateTime dateFin){
+        String checkPeriod = "SELECT * FROM anime WHERE idAnimateur=? AND date BETWEEN ? AND ?";
+        try {
+            PreparedStatement check = pdo.prepareStatement(checkPeriod);
+            check.setInt(1, idAnimateur);
+            check.setTimestamp(2, Timestamp.valueOf(dateDebut));
+            check.setTimestamp(3, Timestamp.valueOf(dateFin));
+            ResultSet res = check.executeQuery();
+            return res.next();
+        } catch (SQLException e) {
+            return false;
         }
     }
 
