@@ -60,13 +60,13 @@ public class Main {
                 Navigation.set_animators();
 
             else if (main_choice.equals("Envoyer les plannings"))
-                Navigation.send_plannings();
+                Navigation.send_plannings(config);
 
             else if (main_choice.equals("Modifier mon compte"))
                 Navigation.edit_my_account();
 
             else if (main_choice.equals("Recevoir mon planning"))
-                Navigation.receive_my_planning();
+                Navigation.receive_my_planning(config);
         }
 
         exit(0);

@@ -2,12 +2,11 @@ package navigation;
 import dbres.*;
 import models.Animation;
 import models.Animator;
-import utils.DB;
-import utils.Input;
-import utils.TextDeco;
-import utils.TimeUtils;
+import models.Config;
+import utils.*;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,7 +129,7 @@ public class Navigation {
         Choice[] choices_directeur = {
             new Choice("Créer un compte", "Créez un compte directeur ou animateur."),
             new Choice("Modifier un compte", "Modifiez le compte d'un utilisateur."),
-            new Choice("Supprimer un compte", "Supprimez le compte d'un utilisateur. Toutes les données du compte seront effacées."),
+            new Choice("Supprimer un compte", "Supprimez le compte d'un utilisateur qui n'a rien animé."),
             new Choice("Créer une animation", "Créez une animation."),
             new Choice("Attribuer des animateurs", "Attribuez ou retirez des animateurs à une animation."),
             new Choice("Envoyer les plannings", "Envoyez les plannings hebdomadaires à chaque animateur."),
@@ -243,6 +242,7 @@ public class Navigation {
             IO.println(animator.get_info());
 
         // Demande les emails
+        List<String> entered = new ArrayList<>();
         String all_emails = Input.get_string("Saissiez l'email des animateurs à " + (is_add ? "ajouter dans" : "retirer de") + " l'animation \"" + res_anim.animation.get_info() + "\", avec un espace comme séparateur :\n");
         String[] emails = all_emails.split(" ");
 
@@ -259,6 +259,12 @@ public class Navigation {
 
         // Ajoute les animateurs
         for (String email : emails) {
+            // Retire les dupliqués
+            if (entered.contains(email))
+                continue;
+
+            entered.add(email);
+
             if (is_add) {
                 DBRes res = DB.addAnimatorToAnimation(edit_anim_name, email, date_time);
                 IO.println(res.ok ? (email + " anime désormais " + edit_anim_name) : res.error);
@@ -273,15 +279,35 @@ public class Navigation {
         Input.get_string("Terminé. Appuyez sur Entrer pour continuer.");
     }
 
-    public static void send_plannings() {
-        // TODO
+    public static void send_plannings(Config config) {
+        // Récupération de l'ID de chaque animateur qui anime
+        LocalDateTime dateFrom = TimeUtils.date_now();
+        LocalDateTime dateTo = TimeUtils.date_next_week();
+        DBAllAnimators res = DB.getAnimatorsWhoAnimate(dateFrom, dateTo);
+
+        // Quitte si erreur
+        if (!res.ok) {
+            Menu.set_popup(res.error);
+            return;
+        }
+
+        for (Animator animator : res.animators) {
+            byte[] pdf = Utils.genererPDF(dateFrom, dateTo, animator.id);
+            Utils.envoiMail(config, pdf, dateFrom, dateTo, animator.id);
+        }
+
+        Menu.set_popup("Les plannings ont été envoyés.");
     }
 
     public static void edit_my_account() {
         Navigation.edit_an_account(DB.myEmail, false);
     }
 
-    public static void receive_my_planning() {
-        // TODO
+    public static void receive_my_planning(Config config) {
+        LocalDateTime dateFrom = TimeUtils.date_now();
+        LocalDateTime dateTo = TimeUtils.date_next_week();
+        byte[] pdf = Utils.genererPDF(dateFrom, dateTo, DB.loggedUser);
+        Utils.envoiMail(config, pdf, dateFrom, dateTo, DB.loggedUser);
+        Menu.set_popup("Votre planning a été envoyé sur votre adresse email.");
     }
 }
