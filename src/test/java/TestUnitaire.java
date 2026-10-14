@@ -1,13 +1,13 @@
-package utils;
-
 import dbres.DBRes;
 import models.Config;
 import org.junit.Assert;
+import utils.DB;
 
-import javax.print.attribute.standard.JobKOctetsSupported;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 class TestUnitaire {
     private static String compte_email = null;
@@ -18,22 +18,38 @@ class TestUnitaire {
 
     @org.junit.jupiter.api.Test
     void passwordStrong() {
-        String testPassword= "123Azerty@123";
-        String test2= "123";
-        Assert.assertTrue(DB.passwordStrong(testPassword));
-        Assert.assertFalse(DB.passwordStrong(test2));
+        HashMap<String, Boolean> mdps = new HashMap<>();
+        mdps.put("123Azerty@123", true);
+        mdps.put("okbonjour!", false);
+        mdps.put("azertyuiopQSDFGHJKLM", false);
+        mdps.put("0550002D", false);
+        mdps.put("mApv8zA!ef22SApomme", true);
+
+        for (Map.Entry<String, Boolean> entry : mdps.entrySet()) {
+            String mdp = entry.getKey();
+            Boolean res = entry.getValue();
+            Assert.assertEquals(DB.passwordStrong(mdp), res);
+        }
     }
 
     @org.junit.jupiter.api.Test
     void verifMail() {
-        String mailTest="test@test.com";
-        Assert.assertTrue(DB.verifMail(mailTest));
-        String mailFail="testtest";
-        Assert.assertFalse(DB.verifMail(mailFail));
+        HashMap<String, Boolean> emails = new HashMap<>();
+        emails.put("annehimation@gmail.com", true);
+        emails.put("@orange.fr", false);
+        emails.put("anthonyguedes@sfr.fr", true);
+        emails.put("machin truc@free.fr", false);
+        emails.put("etanchangeat@gmail.com", true);
+
+        for (Map.Entry<String, Boolean> entry : emails.entrySet()) {
+            String email = entry.getKey();
+            Boolean res = entry.getValue();
+            Assert.assertEquals(DB.verifMail(email), res);
+        }
     }
 
     @org.junit.jupiter.api.Test
-    void db_compte() {
+    void config_db_compte_ajout_suppression() {
         // Ouverture config
         Config config = new Config("./config.json");
         Assert.assertTrue("Config invalide", config.is_valid());
@@ -48,14 +64,14 @@ class TestUnitaire {
         // Vérif de l'email
         Assert.assertTrue("Email invalide", DB.verifMail(email));
 
-        // vérif mot de passe
+        // Vérif mot de passe
         Assert.assertTrue("Mot de passe trop faible", DB.passwordStrong(mdp));
 
         // Ajout du compte
         DBRes res_ajout = DB.registerAccount(email, "test tel", "test nom", "test prénom", "test rue", "test ville", "12345", mdp, false);
         Assert.assertTrue(res_ajout.error, res_ajout.ok);
 
-        // Reqquêtes SQL pures
+        // Requêtes SQL pures
         String sql_select = "SELECT id FROM utilisateur WHERE mail LIKE ?";
         String sql_delete = "DELETE FROM utilisateur WHERE id = ?";
 

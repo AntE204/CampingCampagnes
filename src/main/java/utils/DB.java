@@ -84,7 +84,7 @@ public class DB {
      * @return Si le mot de passe est assez fort
      */
     public static boolean passwordStrong(String pwd) {
-        return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.])(?=\\S+$).{12,}$");
+        return pwd.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.!?_])(?=\\S+$).{12,}$");
     }
 
     /**
