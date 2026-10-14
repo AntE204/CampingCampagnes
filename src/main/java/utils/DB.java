@@ -184,7 +184,7 @@ public class DB {
      */
     public static DBDeleteAccount deleteAccount(String email) {
         String sql_select = "SELECT id FROM utilisateur WHERE mail LIKE ?";
-        String sql_delete = "DELETE FROM utilisateur WHERE mail LIKE ?";
+        String sql_delete = "DELETE FROM utilisateur WHERE mail LIKE ? AND utilisateur.id NOT IN (SELECT idAnimateur FROM anime)";
 
         try {
             // Vérifie si l'utilisateur supprimé est l'utilisateur connecté
