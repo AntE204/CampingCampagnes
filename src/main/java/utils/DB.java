@@ -111,7 +111,6 @@ public class DB {
                 if(verifMail(mail)){
                     if (passwordStrong(mdpClair)) {
                         String mdpHash = BCrypt.hashpw(mdpClair, BCrypt.gensalt());
-                        System.out.println("L'utilisateur a bien été crée");
                         PreparedStatement prep = pdo.prepareStatement(insert);
                         prep.setString(1, mail);
                         prep.setString(2, tel);
@@ -739,5 +738,9 @@ public class DB {
         } catch (SQLException e) {
             throw new RuntimeException("Erreur SQL lors de la récupération de l'animateur", e);
         }
+    }
+
+    public static Connection getPdo() {
+        return DB.pdo;
     }
 }
