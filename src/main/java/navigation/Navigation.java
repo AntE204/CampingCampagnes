@@ -137,6 +137,7 @@ public class Navigation {
 
         Choice[] choices_animateur = {
             new Choice("Modifier mon compte", "Modifiez les informations de votre compte."),
+            new Choice("Consulter mes informations", "Consultez les informations personnelles de votre compte."),
             new Choice("Recevoir mon planning", "Recevez le planning de vos animations de la semaine."),
             Navigation.choice_exit
         };
@@ -162,6 +163,26 @@ public class Navigation {
         }
 
         Navigation.register_account(false, reask_permission ? null : (DB.isDirecteur ? "directeur" : "animateur"), old_email);
+    }
+
+    public static void check_my_info() {
+        DBSingleAnimator res = DB.getMyInfo();
+
+        if (!res.ok) {
+            Menu.set_popup(res.error);
+            return;
+        }
+
+        Animator anim = res.animator;
+        IO.println("Email : " + anim.email);
+        IO.println("Prénom : " + anim.first_name);
+        IO.println("Nom : " + anim.last_name);
+        IO.println("Rue : " + anim.street);
+        IO.println("Ville : " + anim.town);
+        IO.println("Code Postal : " + anim.zip_code);
+        IO.println("Téléphone : " + anim.phone);
+        IO.println("Permission : " + (anim.is_director ? "Directeur" : "Animateur"));
+        Input.get_string("Appuyez sur Entrer pour continuer.");
     }
 
     /**

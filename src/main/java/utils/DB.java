@@ -559,7 +559,7 @@ public class DB {
                     res.getString("rue"),
                     res.getString("ville"),
                     res.getString("codePostal"),
-                    res.getString("tel"),
+                    res.getString("telephone"),
                     DB.isDirecteur
                 );
                 return new DBSingleAnimator(true, null, animateur);

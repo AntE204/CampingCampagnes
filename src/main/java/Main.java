@@ -61,6 +61,9 @@ public class Main {
             else if (main_choice.equals("Modifier mon compte"))
                 Navigation.edit_my_account();
 
+            else if (main_choice.equals("Consulter mes informations"))
+                Navigation.check_my_info();
+
             else if (main_choice.equals("Recevoir mon planning"))
                 Navigation.receive_my_planning(config);
         }
