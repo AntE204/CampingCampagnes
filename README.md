@@ -2,9 +2,10 @@
 CampingCampagnes est un outil de gestion pour les campings. Il permet de gérer les comtpes du personnel interne, la création d'animations ainsi que l'envoi par email du planning d'un animateur.
 
 # Prérequis
-- Maven : `sudo apt install maven`
+- [Maven](https://maven.apache.org/) : `sudo apt install maven`
 - JDK 25 ou plus : `sudo apt install openjdk-25-jdk`
-- Service de base de données MySQL ou MariaDB
+- Service de base de données [MySQL](https://www.mysql.com/) ou [MariaDB](https://mariadb.org/)
+- Un compte [MailJet](https://www.mailjet.com/) pour envoyer des emails
 
 # Installation
 - Clonez le projet : `git clone https://github.com/AntE204/CampingCampagnes.git`
@@ -26,4 +27,14 @@ CampingCampagnes est un outil de gestion pour les campings. Il permet de gérer 
 - Les annimateurs eux possèdent des droits restreints : modifier leur compte et recevoir leur planning.
 
 # Images
-TODO
+Menu de connexion<br>
+<img src="https://i.postimg.cc/mkCNR3TJ/1.png"><br>
+
+Pannel du directeur<br>
+<img src="https://i.postimg.cc/FsbgBxWZ/2.png"><br>
+
+Création d'une animation<br>
+<img src="https://i.postimg.cc/y8vhV8z4/3.png"><br>
+
+Attribution d'animateurs à une animation<br>
+<img src="https://i.postimg.cc/1zdj3HZN/4.png"><br>
