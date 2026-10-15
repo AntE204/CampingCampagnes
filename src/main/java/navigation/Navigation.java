@@ -49,8 +49,10 @@ public class Navigation {
 
     /**
      * Permet de créer ou modifier un compte en demandant les informations
+     * @param first_time Si c'est le premier compte à enregistrer
      * @param force_permission Force la permission, null pour la demander
      * @param old_email En cas de modification de compte, l'ancien email de l'utilisateur
+     * @return Si le compte a bien été enregistré
      */
     public static boolean register_account(boolean first_time, String force_permission, String old_email) {
         boolean force_director = force_permission != null && force_permission.equals("directeur");
@@ -124,7 +126,7 @@ public class Navigation {
      * Menu principal, adapté en fonction des droits
      * @return Le title du choix sélectionné
      */
-    public static String menu_main(String first_name) {
+    public static String menu_main() {
         Choice[] choices_directeur = {
             new Choice("Créer un compte", "Créez un compte directeur ou animateur."),
             new Choice("Modifier un compte", "Modifiez le compte d'un utilisateur."),
@@ -142,14 +144,16 @@ public class Navigation {
             Navigation.choice_exit
         };
 
-        Menu menu = new Menu("Bonjour " + first_name + ".", null, DB.isDirecteur ? choices_directeur : choices_animateur, 0);
+        Menu menu = new Menu("Connecté en tant que " + DB.firstName + ".", null, DB.isDirecteur ? choices_directeur : choices_animateur, 0);
         return menu.run();
     }
 
     /**
      * Demande les informations d'un compte à modifier
+     * @param force_email Si on doit conserver l'email (null pourproposer de le changer)
+     * @param force_permission La permission à forcer, null pour la demander
      */
-    public static void edit_an_account(String force_email, boolean reask_permission) {
+    public static void edit_an_account(String force_email, boolean force_permission) {
         String old_email;
         if (force_email == null)
             old_email = Input.get_string("Entrez l'email du compte à modifier : ");
@@ -162,9 +166,12 @@ public class Navigation {
             return;
         }
 
-        Navigation.register_account(false, reask_permission ? null : (DB.isDirecteur ? "directeur" : "animateur"), old_email);
+        Navigation.register_account(false, force_permission ? null : (DB.isDirecteur ? "directeur" : "animateur"), old_email);
     }
 
+    /**
+     * Affiche les informations personnelles de l'utilisateur connecté
+     */
     public static void check_my_info() {
         DBSingleAnimator res = DB.getMyInfo();
 
@@ -207,6 +214,9 @@ public class Navigation {
         return res.is_self;
     }
 
+    /**
+     * Demande le nom et la durée d'une animation, puis l'ajoute à la base de données
+     */
     public static void create_animation() {
         String name = Input.get_string("Nom de l'animation : ");
 
@@ -221,6 +231,9 @@ public class Navigation {
         Menu.set_popup(res_create.ok ? "L'animation a été créée !" : res_create.error);
     }
 
+    /**
+     * Demande les animateurs à ajouter / retirer d'une animation
+     */
     public static void set_animators() {
         // Récupère toutes les animations
         DBAllAnimations res_animations = DB.getAllAnimations();
@@ -237,9 +250,8 @@ public class Navigation {
         }
 
         // Affiche chaque animation
-        for (Animation anim : res_animations.animations) {
+        for (Animation anim : res_animations.animations)
             IO.println(anim.get_info());
-        }
 
         // Demande nom de l'anim à l'utilisateur
         String edit_anim_name = Input.get_string("Saisissez le nom (sans la durée) de l'animation à modifier (vide pour quitter) : ");
@@ -299,6 +311,10 @@ public class Navigation {
         Input.get_string("Terminé. Appuyez sur Entrer pour continuer.");
     }
 
+    /**
+     * Envoie les plannings hebdomadaires à tous les animateurs
+     * @param config Le fichier de configuration de l'application
+     */
     public static void send_plannings(Config config) {
         // Récupération de l'ID de chaque animateur qui anime
         LocalDateTime dateFrom = TimeUtils.date_now();
@@ -321,10 +337,17 @@ public class Navigation {
         Menu.set_popup(message);
     }
 
+    /**
+     * Demande les informations à modifier sur le compte de l'utilisateur connecté
+     */
     public static void edit_my_account() {
         Navigation.edit_an_account(DB.myEmail, false);
     }
 
+    /**
+     * Envoi le planning de l'utilisateur connecté par mail
+     * @param config Le fichier de configuration de l'application
+     */
     public static void receive_my_planning(Config config) {
         LocalDateTime dateFrom = TimeUtils.date_now();
         LocalDateTime dateTo = TimeUtils.date_next_week();

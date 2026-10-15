@@ -35,7 +35,7 @@ public class Main {
 
         boolean stay = true;
         while (stay) {
-            String main_choice = Navigation.menu_main(DB.firstName);
+            String main_choice = Navigation.menu_main();
             stay = !main_choice.equals("Quitter");
 
             if (main_choice.equals("Créer un compte"))

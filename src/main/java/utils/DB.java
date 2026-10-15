@@ -247,7 +247,7 @@ public class DB {
      * Fonction pour créer une animation
      * @param libelle Le nom de l'activite que l'on veut créer
      * @param dureeEnMinutes La durée de l'activité en minutes
-     * @return Si l'animation a bien été crée
+     * @return Si l'animation a bien été créée
      */
     public static DBRes createAnimation(String libelle, int dureeEnMinutes){
         String newAnime= "INSERT INTO animation (libelle, duree) VALUES (?, ?)";
@@ -543,6 +543,10 @@ public class DB {
         }
     }
 
+    /**
+     * Récupère les informations de l'utilisateur connecté
+     * @return Les informations de l'utilisateur connecté
+     */
     public static DBSingleAnimator getMyInfo(){
         String recup = "SELECT * FROM utilisateur WHERE id=?";
         try {
@@ -571,8 +575,11 @@ public class DB {
         }
     }
 
+    /**
+     * Récupère l'objet DB
+     * @return L'objet DB
+     */
     public static Connection getPdo() {
         return DB.pdo;
     }
-
 }
