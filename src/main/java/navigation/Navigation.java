@@ -11,13 +11,14 @@ import java.util.List;
 
 public class Navigation {
     private static Choice choice_exit = new Choice("Quitter", null);
+
     /**
      * Menu "Se connecter / Quitter"
      * @return Le title du choix sélectionné
      */
     public static String menu_login() {
         Choice[] choices = {
-            new Choice("Se connecter", "Si vous ne possédez pas de compte, demandez à la responsable Anne Himation d'en créer un pour vous."),
+            new Choice("Se connecter", "Si vous ne possédez pas de compte, demandez à un directeur d'en créer un pour vous."),
             Navigation.choice_exit
         };
         Menu menu = new Menu("Connexion", null, choices, 0);
@@ -30,19 +31,19 @@ public class Navigation {
      * @return Si la connexion au compte a fonctionné
      */
     public static boolean ask_login() {
-        IO.println("Connectez-vous à votre compte.");
+        IO.println(TextDeco.ORANGE + "   Connectez-vous à votre compte.");
 
         boolean ask = true;
         while (ask) {
-            String email = Input.get_string("Email : ");
-            String password = Input.get_password("Mot de passe : ");
+            String email = Input.get_string(TextDeco.BLUE + "   Email : " + TextDeco.YELLOW);
+            String password = Input.get_password(TextDeco.BLUE + "   Mot de passe : " + TextDeco.YELLOW);
 
             DBRes res = DB.connexion(email, password);
 
             if (res.ok)
                 return true;
 
-            ask = Input.get_bool(TextDeco.RED + "Identifiants incorrects. " + TextDeco.RESET + "Réessayer? (o/n) : ", 'o', 'n');
+            ask = Input.get_bool(TextDeco.RED + "\n   Identifiants incorrects. " + TextDeco.BLUE + "Réessayer? " + TextDeco.YELLOW + "(o/n)" + TextDeco.BLUE + " : " + TextDeco.YELLOW, 'o', 'n');
         }
         return false;
     }
@@ -61,46 +62,46 @@ public class Navigation {
         if (first_time) {
             force_director = true;
             force_animator = false;
-            IO.println("Aucun compte directeur n'existe dans la base de données. Veuillez en créer un.");
+            IO.println(TextDeco.ORANGE + "   Aucun compte directeur n'existe dans la base de données. Veuillez en créer un.");
         }
 
         // Email
         String email;
         while (true) {
-            email = Input.get_string("Email : ");
+            email = Input.get_string(TextDeco.BLUE + "   Email : " + TextDeco.YELLOW);
 
             DBRes res = DB.emailUsed(email);
             if (!res.ok && old_email == null)
-                IO.println(res.error);
+                IO.println(TextDeco.RED + res.error);
 
             else if (DB.verifMail(email))
                 break;
 
             else
-                IO.println("L'email n'est pas valide !");
+                IO.println(TextDeco.RED + "   L'email n'est pas valide !");
         }
 
         // MDP
         String password;
         while (true) {
-            password = Input.get_password("Mot de passe : ");
+            password = Input.get_password(TextDeco.BLUE + "   Mot de passe : " + TextDeco.YELLOW);
             if (DB.passwordStrong(password))
                 break;
 
-            IO.println("Le mot de passe doit :\n-Comporter 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial\n- Compoter au moins 12 caractères");
+            IO.println(TextDeco.RED + "   Le mot de passe doit comporter :\n   - 1 majuscule\n   - 1 minuscule\n   - 1 chiffre\n   - 1 caractère spécial\n   - Au moins 12 caractères");
         }
 
-        while (!Input.get_password("Confirmer le mot de passe : ").equals(password))
-            IO.println("Le mot de passe ne correspond pas !");
+        while (!Input.get_password(TextDeco.BLUE + "   Confirmer le mot de passe : " + TextDeco.YELLOW).equals(password))
+            IO.println(TextDeco.RED + "Le mot de passe ne correspond pas !");
 
         // Autres infos
-        String first_name = Input.get_string("Prénom : ");
-        String last_name = Input.get_string("Nom : ");
-        String street = Input.get_string("Rue : ");
-        String town = Input.get_string("Ville : ");
-        String zip_code = Input.get_string("Code postal : ");
-        String phone = Input.get_string("Numéro de téléphone (facultatif) : ");
-        boolean is_director = force_director || (!force_animator && Input.get_bool("Compte directeur ? (o/n) : ", 'o', 'n'));
+        String first_name = Input.get_string(TextDeco.BLUE + "   Prénom : " + TextDeco.YELLOW);
+        String last_name = Input.get_string(TextDeco.BLUE + "   Nom : " + TextDeco.YELLOW);
+        String street = Input.get_string(TextDeco.BLUE + "   Rue : " + TextDeco.YELLOW);
+        String town = Input.get_string(TextDeco.BLUE + "   Ville : " + TextDeco.YELLOW);
+        String zip_code = Input.get_string(TextDeco.BLUE + "   Code postal : " + TextDeco.YELLOW);
+        String phone = Input.get_string(TextDeco.BLUE + "   Numéro de téléphone (facultatif) : " + TextDeco.YELLOW);
+        boolean is_director = force_director || (!force_animator && Input.get_bool(TextDeco.BLUE + "   Compte directeur ? " + TextDeco.YELLOW + "(o/n)" + TextDeco.BLUE + " : " + TextDeco.YELLOW, 'o', 'n'));
 
         // Insert ou update
         DBRes res;
@@ -115,6 +116,9 @@ public class Navigation {
             if (first_time)
                 popup += " Veuillez vous y connecter.";
             Menu.set_popup(popup);
+
+            if (first_time)
+                IO.print("\n");
         }
         else
             Menu.set_popup("Le compte n'a pas pu être ajouté dans la base de données : " + res.error);
@@ -127,9 +131,12 @@ public class Navigation {
      * @return Le title du choix sélectionné
      */
     public static String menu_main() {
+        Choice choice_info_perso = new Choice("Consulter mes informations", "Consultez les informations personnelles de votre compte.");
+
         Choice[] choices_directeur = {
             new Choice("Créer un compte", "Créez un compte directeur ou animateur."),
             new Choice("Modifier un compte", "Modifiez le compte d'un utilisateur."),
+            choice_info_perso,
             new Choice("Supprimer un compte", "Supprimez le compte d'un utilisateur qui n'a rien animé."),
             new Choice("Créer une animation", "Créez une animation."),
             new Choice("Attribuer des animateurs", "Attribuez ou retirez des animateurs à une animation."),
@@ -139,7 +146,7 @@ public class Navigation {
 
         Choice[] choices_animateur = {
             new Choice("Modifier mon compte", "Modifiez les informations de votre compte."),
-            new Choice("Consulter mes informations", "Consultez les informations personnelles de votre compte."),
+            choice_info_perso,
             new Choice("Recevoir mon planning", "Recevez le planning de vos animations de la semaine."),
             Navigation.choice_exit
         };
@@ -156,7 +163,7 @@ public class Navigation {
     public static void edit_an_account(String force_email, boolean force_permission) {
         String old_email;
         if (force_email == null)
-            old_email = Input.get_string("Entrez l'email du compte à modifier : ");
+            old_email = Input.get_string(TextDeco.ORANGE + "   Entrez l'email du compte à modifier : " + TextDeco.YELLOW);
         else
             old_email = force_email;
 
@@ -181,15 +188,15 @@ public class Navigation {
         }
 
         Animator anim = res.animator;
-        IO.println("Email : " + anim.email);
-        IO.println("Prénom : " + anim.first_name);
-        IO.println("Nom : " + anim.last_name);
-        IO.println("Rue : " + anim.street);
-        IO.println("Ville : " + anim.town);
-        IO.println("Code Postal : " + anim.zip_code);
-        IO.println("Téléphone : " + anim.phone);
-        IO.println("Permission : " + (anim.is_director ? "Directeur" : "Animateur"));
-        Input.get_string("Appuyez sur Entrer pour continuer.");
+        IO.println(TextDeco.BLUE + "   Email : " + TextDeco.YELLOW + anim.email);
+        IO.println(TextDeco.BLUE + "   Prénom : " + TextDeco.YELLOW + anim.first_name);
+        IO.println(TextDeco.BLUE + "   Nom : " + TextDeco.YELLOW + anim.last_name);
+        IO.println(TextDeco.BLUE + "   Rue : " + TextDeco.YELLOW + anim.street);
+        IO.println(TextDeco.BLUE + "   Ville : " + TextDeco.YELLOW + anim.town);
+        IO.println(TextDeco.BLUE + "   Code Postal : " + TextDeco.YELLOW + anim.zip_code);
+        IO.println(TextDeco.BLUE + "   Téléphone : " + TextDeco.YELLOW + anim.phone);
+        IO.println(TextDeco.BLUE + "   Permission : " + TextDeco.YELLOW + (anim.is_director ? "Directeur" : "Animateur"));
+        Input.get_password(TextDeco.GREEN + "\n   Appuyez sur Entrer pour continuer.");
     }
 
     /**
@@ -197,7 +204,7 @@ public class Navigation {
      * @return Si l'utilisateur supprimé correspond à l'utilisateur actuellement connecté
      */
     public static boolean delete_account() {
-        String email = Input.get_string("Entrez l'email de l'utilisateur à supprimer : ");
+        String email = Input.get_string(TextDeco.BLUE + "   Entrez l'email de l'utilisateur à supprimer : " + TextDeco.YELLOW);
 
         // Email pas utilisé
         if (!DB.verifMail(email)) {
@@ -207,7 +214,7 @@ public class Navigation {
 
         DBDeleteAccount res = DB.deleteAccount(email);
         if (res.is_self)
-            IO.println(res.error);
+            IO.println(TextDeco.GREEN + "   " + res.error);
         else
             Menu.set_popup(res.error);
 
@@ -218,7 +225,7 @@ public class Navigation {
      * Demande le nom et la durée d'une animation, puis l'ajoute à la base de données
      */
     public static void create_animation() {
-        String name = Input.get_string("Nom de l'animation : ");
+        String name = Input.get_string(TextDeco.BLUE + "   Nom de l'animation : " + TextDeco.YELLOW);
 
         DBRes res_exists = DB.animationExists(name);
         if (!res_exists.ok) {
@@ -226,7 +233,7 @@ public class Navigation {
             return;
         }
 
-        int length = Input.get_int("Durée de l'animation en minutes : ");
+        int length = Input.get_int(TextDeco.BLUE + "   Durée de l'animation en minutes : " + TextDeco.YELLOW);
         DBRes res_create = DB.createAnimation(name, length);
         Menu.set_popup(res_create.ok ? "L'animation a été créée !" : res_create.error);
     }
@@ -250,11 +257,12 @@ public class Navigation {
         }
 
         // Affiche chaque animation
+        IO.println(TextDeco.ORANGE + "   Liste des animations :");
         for (Animation anim : res_animations.animations)
-            IO.println(anim.get_info());
+            IO.println(TextDeco.YELLOW + "   " + anim.get_info());
 
         // Demande nom de l'anim à l'utilisateur
-        String edit_anim_name = Input.get_string("Saisissez le nom (sans la durée) de l'animation à modifier (vide pour quitter) : ");
+        String edit_anim_name = Input.get_string(TextDeco.BLUE + "\n   Saisissez le nom (sans la durée) de l'animation à modifier (vide pour quitter) : " + TextDeco.YELLOW);
         if (edit_anim_name.isEmpty())
             return;
 
@@ -266,27 +274,28 @@ public class Navigation {
         }
 
         // Choix ajouter / retirer
-        boolean is_add = Input.get_bool("Voulez-vous ajouter ou retirer des animateurs ? (+/-) : ", '+', '-');
+        boolean is_add = Input.get_bool(TextDeco.BLUE + "   Voulez-vous ajouter ou retirer des animateurs ? " + TextDeco.YELLOW + "(+/-)" + TextDeco.BLUE + " : " + TextDeco.YELLOW, '+', '-');
         IO.print("\n");
 
         // Affiche les animateurs
+        IO.println(TextDeco.ORANGE + "   Liste des animateurs :");
         for (Animator animator : res_animators.animators)
-            IO.println(animator.get_info());
+            IO.println(TextDeco.YELLOW + "   " + animator.get_info());
 
         // Demande les emails
         List<String> entered = new ArrayList<>();
-        String all_emails = Input.get_string("Saissiez l'email des animateurs à " + (is_add ? "ajouter dans" : "retirer de") + " l'animation \"" + res_anim.animation.get_info() + "\", avec un espace comme séparateur :\n");
+        String all_emails = Input.get_string(TextDeco.BLUE + "\n   Saissiez les emails des animateurs à " + (is_add ? "ajouter dans" : "retirer de") + " l'animation " + TextDeco.YELLOW + "\"" + res_anim.animation.get_info() + "\"" + TextDeco.BLUE + ", avec un espace comme séparateur :\n   " + TextDeco.YELLOW);
         String[] emails = all_emails.split(" ");
 
         // Demande la date et l'heure de l'animation
         String date_time = null;
         while (is_add) {
-            date_time = Input.get_string("Date et heure de l'animation (format aaaa-mm-jj hh:mm) : ");
+            date_time = Input.get_string(TextDeco.BLUE + "\n   Date et heure de l'animation (format aaaa-mm-jj hh:mm) : " + TextDeco.YELLOW);
 
             if (TimeUtils.is_date_time_valid(date_time))
                 break;
 
-            IO.println("Le format de la date n'est pas valide !");
+            IO.println(TextDeco.RED + "   Le format de la date n'est pas valide !");
         }
 
         // Ajoute les animateurs
@@ -299,16 +308,16 @@ public class Navigation {
 
             if (is_add) {
                 DBRes res = DB.addAnimatorToAnimation(edit_anim_name, email, date_time);
-                IO.println(res.ok ? (email + " anime désormais " + edit_anim_name) : res.error);
+                IO.println("   " + (res.ok ? (TextDeco.YELLOW + email + TextDeco.BLUE + " anime désormais " + TextDeco.YELLOW + edit_anim_name) : (TextDeco.RED + res.error)));
             }
             else {
                 DBRes res = DB.removeAnimatorFromAnimation(edit_anim_name, email);
-                IO.println(res.ok ? (email + " n'anime plus " + edit_anim_name) : res.error);
+                IO.println("   " + (res.ok ? (TextDeco.YELLOW + email + TextDeco.BLUE + " n'anime plus " + TextDeco.YELLOW + edit_anim_name) : (TextDeco.RED + res.error)));
             }
         }
 
         // Attend un input utilisateur
-        Input.get_string("Terminé. Appuyez sur Entrer pour continuer.");
+        Input.get_password(TextDeco.GREEN + "\n   Appuyez sur Entrer pour continuer.");
     }
 
     /**
@@ -328,10 +337,19 @@ public class Navigation {
         }
 
         String message = "";
-        for (Animator animator : res.animators) {
-            byte[] pdf = Utils.genererPDF(dateFrom, dateTo, animator.id);
-            String mail_res = Utils.envoiMail(config, pdf, dateFrom, dateTo, animator.id);
-            message += (mail_res + "\n");
+
+        if (res.animators.isEmpty()) {
+            message = "Aucun animateur n'anime cette semaine.";
+        }
+        else {
+            for (Animator animator : res.animators) {
+                byte[] pdf = Utils.genererPDF(dateFrom, dateTo, animator.id);
+                String mail_res = Utils.envoiMail(config, pdf, dateFrom, dateTo, animator.id);
+                message += (mail_res + "\n");
+            }
+
+            // Retire le dernir \n
+            message = message.substring(0, message.length() - 1);
         }
 
         Menu.set_popup(message);

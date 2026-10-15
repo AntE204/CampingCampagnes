@@ -229,7 +229,7 @@ public class Utils {
 
             try {
                 MailjetResponse response = client.post(request);
-                return "Envoi du planning à " + mailA + " (" + response.getStatus() + ")";
+                return "Envoi du planning à " + mailA + " (réponse : " + response.getStatus() + ")";
                 // System.out.println("Statut : " + response.getStatus());
                 // System.out.println("Données : " + response.getData());
             }

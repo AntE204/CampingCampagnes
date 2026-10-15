@@ -133,14 +133,22 @@ public class Menu extends TitleDesc {
         IO.println("\u001B[H\u001B[2J");
         System.out.flush();
 
+        // Bannière
+        IO.println(TextDeco.BROWN + "   ___                 _         " + TextDeco.GREEN + "   ___                                        ");
+        IO.println(TextDeco.BROWN + "  / __|__ _ _ __  _ __(_)_ _  __ _ " + TextDeco.GREEN + "/ __|__ _ _ __  _ __  __ _ __ _ _ _  ___ ___");
+        IO.println(TextDeco.BROWN + " | (__/ _` | '  \\| '_ \\ | ' \\/ _` | " + TextDeco.GREEN + "(__/ _` | '  \\| '_ \\/ _` / _` | ' \\/ -_|_-<");
+        IO.println(TextDeco.BROWN + "  \\___\\__,_|_|_|_| .__/_|_||_\\__, |" + TextDeco.GREEN + "\\___\\__,_|_|_|_| .__/\\__,_\\__, |_||_\\___/__/");
+        IO.println(TextDeco.BROWN + "                 |_|         |___/ " + TextDeco.GREEN + "               |_|        |___/             ");
+        IO.println(TextDeco.RESET + "\n-------------------------------------------------------------------------------\n");
+
         // Title et desc du menu
-        IO.println(TextDeco.BLUE + this.get_title());
+        IO.println(TextDeco.BLUE + "   " + this.get_title());
         if (this.get_desc() != null)
-            IO.println(TextDeco.AQUA + this.get_desc());
+            IO.println(TextDeco.AQUA + "   " + this.get_desc());
 
         // Popup
         if (Menu.popup != null) {
-            IO.println(Menu.popup);
+            IO.println(TextDeco.PURPLE + "   " + Menu.popup + TextDeco.RESET);
             Menu.popup = null;
         }
 
@@ -157,7 +165,7 @@ public class Menu extends TitleDesc {
                 IO.print(TextDeco.HIGHLIGHT_BLUE + TextDeco.BLACK + " > " + choice.get_title() + " " + TextDeco.RESET);
 
                 if (choice.get_desc() != null)
-                    IO.print(" " + choice.get_desc());
+                    IO.print("  " + choice.get_desc());
 
                 IO.print("\n");
             }
