@@ -543,7 +543,36 @@ public class DB {
         }
     }
 
+    public static DBSingleAnimator getMyInfo(){
+        String recup = "SELECT * FROM utilisateur WHERE id=?";
+        try {
+            PreparedStatement check = pdo.prepareStatement(recup);
+            check.setInt(1, DB.loggedUser);
+            ResultSet res = check.executeQuery();
+
+            if(res.next()){
+                Animator animateur = new Animator(
+                    DB.loggedUser,
+                    res.getString("mail"),
+                    res.getString("prenom"),
+                    res.getString("nom"),
+                    res.getString("rue"),
+                    res.getString("ville"),
+                    res.getString("codePostal"),
+                    res.getString("tel"),
+                    DB.isDirecteur
+                );
+                return new DBSingleAnimator(true, null, animateur);
+            }else{
+                return new DBSingleAnimator(false, "Les informations de votre compte n'ont pas pu être récupérées.", null);
+            }
+        } catch (SQLException e) {
+            return new DBSingleAnimator(false, "Erreur lors de la récupération de vos informations "+e.getMessage(), null);
+        }
+    }
+
     public static Connection getPdo() {
         return DB.pdo;
     }
+
 }
