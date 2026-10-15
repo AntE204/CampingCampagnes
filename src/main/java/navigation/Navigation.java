@@ -290,12 +290,14 @@ public class Navigation {
             return;
         }
 
+        String message = "";
         for (Animator animator : res.animators) {
             byte[] pdf = Utils.genererPDF(dateFrom, dateTo, animator.id);
-            Utils.envoiMail(config, pdf, dateFrom, dateTo, animator.id);
+            String mail_res = Utils.envoiMail(config, pdf, dateFrom, dateTo, animator.id);
+            message += (mail_res + "\n");
         }
 
-        Menu.set_popup("Les plannings ont été envoyés.");
+        Menu.set_popup(message);
     }
 
     public static void edit_my_account() {
@@ -306,7 +308,7 @@ public class Navigation {
         LocalDateTime dateFrom = TimeUtils.date_now();
         LocalDateTime dateTo = TimeUtils.date_next_week();
         byte[] pdf = Utils.genererPDF(dateFrom, dateTo, DB.loggedUser);
-        Utils.envoiMail(config, pdf, dateFrom, dateTo, DB.loggedUser);
-        Menu.set_popup("Votre planning a été envoyé sur votre adresse email.");
+        String res = Utils.envoiMail(config, pdf, dateFrom, dateTo, DB.loggedUser);
+        Menu.set_popup(res);
     }
 }

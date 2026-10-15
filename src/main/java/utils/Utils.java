@@ -210,8 +210,8 @@ public class Utils {
                             .put(new org.json.JSONObject()
                                     .put(Emailv31.Message.FROM,
                                             new org.json.JSONObject()
-                                                    .put("Email", "example@example.com")
-                                                    .put("Name", "Example Example"))
+                                                    .put("Email", config.get("MAILJET_SENDER_EMAIL"))
+                                                    .put("Name", config.get("MAILJET_SENDER_NAME")))
                                     .put(Emailv31.Message.TO, new JSONArray()
                                             .put(new org.json.JSONObject()
                                                     .put("Email", mailA)
@@ -229,7 +229,7 @@ public class Utils {
 
             try {
                 MailjetResponse response = client.post(request);
-                return "Envoi à " + mailA + " : " + response.getStatus();
+                return "Envoi à " + mailA + " (" + response.getStatus() + ")";
                 // System.out.println("Statut : " + response.getStatus());
                 // System.out.println("Données : " + response.getData());
             }
